@@ -22,6 +22,7 @@ using namespace gl;
 #include "game_objects/lights/light_point.hpp"
 #include "game_objects/camera.hpp"
 #include <Jolt/Jolt.h>
+#include "characterController.hpp"
 
 struct App {
     App() {
@@ -158,4 +159,5 @@ private:
         PointLight({2, 4, 1}, {0, 0, 0}, {1, 1, 1}, 30.0f),
     };
     Audio audio;
+    //CharacterController characterController = CharacterController();
 };
