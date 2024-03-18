@@ -21,11 +21,13 @@ using namespace gl;
 #include "game_objects/model.hpp"
 #include "game_objects/lights/light_point.hpp"
 #include "game_objects/camera.hpp"
-#include <Jolt/Jolt.h>
-#include "characterController.hpp"
+// #include <Jolt/Jolt.h>
+// #include "characterController.hpp"
 
-struct App {
-    App() {
+struct App
+{
+    App()
+    {
         // create frame buffer for shadow mapping pipeline
         glCreateFramebuffers(1, &shadowPipeline.framebuffer);
         // attach texture to frame buffer (only draw to depth, no color output!)
@@ -33,16 +35,20 @@ struct App {
         glNamedFramebufferDrawBuffer(shadowPipeline.framebuffer, GL_NONE);
     }
 
-    int run() {
-        while(bRunning) {
+    int run()
+    {
+        while (bRunning)
+        {
             Input::flush(); // flush input from last frame
             timer.update(); // update delta time
-            
+
             SDL_Event event;
-            while (SDL_PollEvent(&event)) {
-                if (event.type == SDL_EventType::SDL_EVENT_QUIT) bRunning = false;
+            while (SDL_PollEvent(&event))
+            {
+                if (event.type == SDL_EventType::SDL_EVENT_QUIT)
+                    bRunning = false;
                 ImGui_ImplSDL3_ProcessEvent(&event);
-                window.handle_event(event); // handle window resize and such events
+                window.handle_event(event);   // handle window resize and such events
                 Input::register_event(event); // handle keyboard/mouse events
             }
             handle_inputs();
@@ -59,36 +65,39 @@ struct App {
     }
 
 private:
-    void imgui_begin() {
+    void imgui_begin()
+    {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
     }
-    void imgui_end() {
+    void imgui_end()
+    {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
-    void draw_ui() {
+    void draw_ui()
+    {
         ImGui::SetNextWindowBgAlpha(0.35f);
-        ImGui::Begin("FPS_Overlay", nullptr, ImGuiWindowFlags_NoDecoration
-            | ImGuiWindowFlags_NoDocking
-            | ImGuiWindowFlags_NoSavedSettings
-            | ImGuiWindowFlags_NoFocusOnAppearing
-            | ImGuiWindowFlags_NoNav);
+        ImGui::Begin("FPS_Overlay", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
         ImGui::Text("%.1f fps", ImGui::GetIO().Framerate);
         ImGui::Text("%.1f ms", ImGui::GetIO().DeltaTime * 1000.0f);
         ImGui::End();
     }
-    void draw() {
+    void draw()
+    {
         // first pass: render shadow map
         glBindFramebuffer(GL_FRAMEBUFFER, shadowPipeline.framebuffer);
         shadowPipeline.bind();
         // for each light
-        for (size_t iLight = 0; iLight < lights.size(); iLight++) {
-            if (bShadowmapsRendered) break;
+        for (size_t iLight = 0; iLight < lights.size(); iLight++)
+        {
+            if (bShadowmapsRendered)
+                break;
             lights[iLight].adjust_viewport();
             // render each cubemap face
-            for (int face = 0; face < 6; face++) {
+            for (int face = 0; face < 6; face++)
+            {
                 // set framebuffer texture and clear it
                 glNamedFramebufferTextureLayer(shadowPipeline.framebuffer, GL_DEPTH_ATTACHMENT, lights[iLight].shadowCubemap, 0, face);
                 glClear(GL_DEPTH_BUFFER_BIT);
@@ -97,8 +106,10 @@ private:
                 // draw models
                 model.draw();
                 // draw other light models
-                for (size_t i = 0; i < lights.size(); i++) {
-                    if (i != iLight) lights[i].draw();
+                for (size_t i = 0; i < lights.size(); i++)
+                {
+                    if (i != iLight)
+                        lights[i].draw();
                 }
             }
         }
@@ -111,32 +122,46 @@ private:
         colorPipeline.bind();
         // bind resources to pipeline
         camera.bind();
-        for (size_t iLight = 0; iLight < lights.size(); iLight++) {
+        for (size_t iLight = 0; iLight < lights.size(); iLight++)
+        {
             lights[iLight].bind_read(iLight, iLight + 1);
         }
         // draw models
-        for (auto& light : lights) light.draw();
+        for (auto &light : lights)
+            light.draw();
         model.draw();
     }
-    void handle_inputs() {
+    void handle_inputs()
+    {
         // draw wireframe while holding f
-        if (Keys::down('f')) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        if (Keys::down('f'))
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        else
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         // capture mouse for better camera controls
-        if (Keys::pressed(SDL_KeyCode::SDLK_ESCAPE)) SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode());
+        if (Keys::pressed(SDL_KeyCode::SDLK_ESCAPE))
+            SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode());
 
         // camera movement
         float movementSpeed = timer.get_delta() * 2.0f; // scale speed relative to framerate
-        if (Keys::pressed(SDL_KeyCode::SDLK_LSHIFT)) movementSpeed *= 3.0f; // sprint button
-        if (Keys::down('s')) camera.translate(0.0f, 0.0f, movementSpeed);
-        if (Keys::down('w')) camera.translate(0.0f, 0.0f, -movementSpeed);
-        if (Keys::down('e')) camera.translate(0.0f, movementSpeed, 0.0f);
-        if (Keys::down('q')) camera.translate(0.0f, -movementSpeed, 0.0f);
-        if (Keys::down('d')) camera.translate(movementSpeed, 0.0f, 0.0f);
-        if (Keys::down('a')) camera.translate(-movementSpeed, 0.0f, 0.0f);
-        
-        if (Keys::pressed('r')) Mix_PlayChannel(-1, audio.samples[0], 0);
+        if (Keys::pressed(SDL_KeyCode::SDLK_LSHIFT))
+            movementSpeed *= 3.0f; // sprint button
+        if (Keys::down('s'))
+            camera.translate(0.0f, 0.0f, movementSpeed);
+        if (Keys::down('w'))
+            camera.translate(0.0f, 0.0f, -movementSpeed);
+        if (Keys::down('e'))
+            camera.translate(0.0f, movementSpeed, 0.0f);
+        if (Keys::down('q'))
+            camera.translate(0.0f, -movementSpeed, 0.0f);
+        if (Keys::down('d'))
+            camera.translate(movementSpeed, 0.0f, 0.0f);
+        if (Keys::down('a'))
+            camera.translate(-movementSpeed, 0.0f, 0.0f);
+
+        if (Keys::pressed('r'))
+            Mix_PlayChannel(-1, audio.samples[0], 0);
 
         // camera rotation
         float rotationSpeed = 0.001f;
@@ -159,5 +184,6 @@ private:
         PointLight({2, 4, 1}, {0, 0, 0}, {1, 1, 1}, 30.0f),
     };
     Audio audio;
-    //CharacterController characterController = CharacterController();
+
+    // CharacterController characterController = CharacterController();
 };
