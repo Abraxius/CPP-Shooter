@@ -14,7 +14,7 @@ include(MiscSettings)
 
 include(FetchContent)
 set(FETCHCONTENT_QUIET OFF) # enable git output for FetchContent steps
-FetchContent_Declare(sdl3 GIT_REPOSITORY "https://github.com/libsdl-org/SDL.git" GIT_TAG "main")
+FetchContent_Declare(sdl3 GIT_REPOSITORY "https://github.com/libsdl-org/SDL.git" GIT_TAG "495e432fb9776fdc13a8d96179136064ccddf6e5")
 FetchContent_Declare(sdl3mixer GIT_REPOSITORY "https://github.com/libsdl-org/SDL_mixer.git" GIT_TAG "main")
 FetchContent_Declare(assimp GIT_REPOSITORY "https://github.com/assimp/assimp.git" GIT_TAG "master")
 FetchContent_Declare(glm GIT_REPOSITORY "https://github.com/g-truc/glm.git" GIT_TAG "bf71a834948186f4097caa076cd2663c69a10e1e")
@@ -27,7 +27,7 @@ FetchContent_MakeAvailable(sdl3 sdl3mixer assimp glm stb cmrc glbinding imgui sp
 set(ENABLE_ALL_WARNINGS OFF)
 FetchContent_Declare(jolt GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics.git" GIT_TAG "master" SOURCE_SUBDIR "build")
 FetchContent_MakeAvailable(jolt)
-set(FETCHCONTENT_FULLY_DISCONNECTED ON CACHE BOOL "Faster config after FetchContent has run once" FORCE)
+set(FETCHCONTENT_FULLY_DISCONNECTED OFF CACHE BOOL "Faster config after FetchContent has run once" FORCE)
 find_package(OpenGL REQUIRED COMPONENTS)
 
 # embedding of cmrc resources
