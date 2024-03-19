@@ -4,11 +4,10 @@
 
 #pragma once
 
-#include <Tests/Character/CharacterBaseTest.h>
 #include <Jolt/Physics/Character/Character.h>
 
 // Simple test that test the Character class. Allows the user to move around with the arrow keys and jump with the J button.
-class CharacterTest : public CharacterBaseTest, public ContactListener
+class CharacterTest 
 {
 public:
 	JPH_DECLARE_RTTI_VIRTUAL(JPH_NO_EXPORT, CharacterTest)

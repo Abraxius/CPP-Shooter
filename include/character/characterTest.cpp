@@ -2,13 +2,8 @@
 // SPDX-FileCopyrightText: 2021 Jorrit Rouwe
 // SPDX-License-Identifier: MIT
 
-#include <TestFramework.h>
 
-//#include <Jolt/Physics/Character/Character.h>
-
-#include <Tests/Character/CharacterTest.h>
-#include <Layers.h>
-#include <Renderer/DebugRendererImp.h>
+#include "CharacterTest.h"
 
 JPH_IMPLEMENT_RTTI_VIRTUAL(CharacterTest)
 {

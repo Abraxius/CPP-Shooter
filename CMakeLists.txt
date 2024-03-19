@@ -15,7 +15,7 @@ include(MiscSettings)
 include(FetchContent)
 set(FETCHCONTENT_QUIET OFF) # enable git output for FetchContent steps
 FetchContent_Declare(sdl3 GIT_REPOSITORY "https://github.com/libsdl-org/SDL.git" GIT_TAG "main")
-FetchContent_Declare(sdl3mixer GIT_REPOSITORY "https://github.com/libsdl-org/SDL_mixer.git" GIT_TAG "main")
+#FetchContent_Declare(sdl3mixer GIT_REPOSITORY "https://github.com/libsdl-org/SDL_mixer.git" GIT_TAG "main")
 FetchContent_Declare(assimp GIT_REPOSITORY "https://github.com/assimp/assimp.git" GIT_TAG "master")
 FetchContent_Declare(glm GIT_REPOSITORY "https://github.com/g-truc/glm.git" GIT_TAG "bf71a834948186f4097caa076cd2663c69a10e1e")
 FetchContent_Declare(stb GIT_REPOSITORY "https://github.com/M2-TE/stb_image.git" GIT_TAG "master")
@@ -23,7 +23,7 @@ FetchContent_Declare(cmrc GIT_REPOSITORY "https://github.com/vector-of-bool/cmrc
 FetchContent_Declare(glbinding GIT_REPOSITORY "https://github.com/cginternals/glbinding.git" GIT_TAG "master")
 FetchContent_Declare(imgui GIT_REPOSITORY "https://github.com/ocornut/imgui.git" GIT_TAG "docking")
 FetchContent_Declare(sponza GIT_REPOSITORY "https://github.com/jimmiebergmann/Sponza.git" GIT_TAG "master" SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/models/sponza")
-FetchContent_MakeAvailable(sdl3 sdl3mixer assimp glm stb cmrc glbinding imgui sponza)
+FetchContent_MakeAvailable(sdl3 assimp glm stb cmrc glbinding imgui sponza)
 set(ENABLE_ALL_WARNINGS OFF)
 FetchContent_Declare(jolt GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics.git" GIT_TAG "master" SOURCE_SUBDIR "build")
 FetchContent_MakeAvailable(jolt)
@@ -53,12 +53,14 @@ target_sources(${PROJECT_NAME} PRIVATE
     "${imgui-sources}"
     "${imgui_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp"
     "${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp")
+target_sources(${PROJECT_NAME} PRIVATE
+    "${JoltPhysics_SOURCE_DIR}")
 
 # link libraries to executable
 target_link_libraries(${PROJECT_NAME} glm::glm) # OpenGL math library
 target_link_libraries(${PROJECT_NAME} SDL3::SDL3)
 target_link_libraries(${PROJECT_NAME} Jolt)
-target_link_libraries(${PROJECT_NAME} SDL3_mixer::SDL3_mixer)
+# target_link_libraries(${PROJECT_NAME} SDL3_mixer::SDL3_mixer)
 target_link_libraries(${PROJECT_NAME} OpenGL::GL) # OpenGL headers
 target_link_libraries(${PROJECT_NAME} glbinding::glbinding) # OpenGL function loader
 target_link_libraries(${PROJECT_NAME} assimp stb-image) # model/image loading

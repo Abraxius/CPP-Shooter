@@ -4,7 +4,7 @@
 
 #include <TestFramework.h>
 
-#include <Jolt/Samples/Tests/Character/CharacterBaseTest.h>
+#include <Tests/Character/CharacterBaseTest.h>
 #include <Jolt/Physics/PhysicsScene.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 #include <Jolt/Physics/Collision/Shape/CylinderShape.h>
@@ -548,22 +548,17 @@ void CharacterBaseTest::ProcessInput(const ProcessInputParams &inParams)
 	mControlInput = rotation * mControlInput;
 
 	// Check actions
-	mJump = false;
-	mSwitchStance = false;
-	for (int key = inParams.mKeyboard->GetFirstKey(); key != 0; key = inParams.mKeyboard->GetNextKey())
-	{
-		if (key == DIK_RSHIFT)
-			mSwitchStance = true;
-		else if (key == DIK_RCONTROL)
-			mJump = true;
-	}
+	mJump = inParams.mKeyboard->IsKeyPressedAndTriggered(DIK_RCONTROL, mWasJump);
+	mSwitchStance = inParams.mKeyboard->IsKeyPressedAndTriggered(DIK_RSHIFT, mWasSwitchStance);
 }
 
-//Update des aktuellen Physic gedöns
 void CharacterBaseTest::PrePhysicsUpdate(const PreUpdateParams &inParams)
 {
 	// Update scene time
 	mTime += inParams.mDeltaTime;
+
+	// Update camera pivot
+	mCameraPivot = GetCharacterPosition();
 
 	// Animate bodies
 	if (!mRotatingBody.IsInvalid())
@@ -601,7 +596,6 @@ void CharacterBaseTest::PrePhysicsUpdate(const PreUpdateParams &inParams)
 	// Call handle input after new velocities have been set to avoid frame delay
 	HandleInput(mControlInput, mJump, mSwitchStance, inParams.mDeltaTime);
 }
-
 
 void CharacterBaseTest::CreateSettingsMenu(DebugUI *inUI, UIElement *inSubMenu)
 {
@@ -643,7 +637,7 @@ RMat44 CharacterBaseTest::GetCameraPivot(float inCameraHeading, float inCameraPi
 {
 	// Pivot is center of character + distance behind based on the heading and pitch of the camera
 	Vec3 fwd = Vec3(Cos(inCameraPitch) * Cos(inCameraHeading), Sin(inCameraPitch), Cos(inCameraPitch) * Sin(inCameraHeading));
-	return RMat44::sTranslation(GetCharacterPosition() + Vec3(0, cCharacterHeightStanding + cCharacterRadiusStanding, 0) - 5.0f * fwd);
+	return RMat44::sTranslation(mCameraPivot + Vec3(0, cCharacterHeightStanding + cCharacterRadiusStanding, 0) - 5.0f * fwd);
 }
 
 void CharacterBaseTest::SaveState(StateRecorder &inStream) const
