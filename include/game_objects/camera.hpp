@@ -20,9 +20,10 @@ struct Camera {
 
     // translate relative to camera direction
     void translate(float x, float y, float z) {
-        position += glm::quat(rotation) * glm::vec3(x, y, z);
+        position += glm::quat(rotation) * glm::vec3(x,y,z);
+        position.y = 1.0f;
     }
-
+    
     void bind() {
         glm::mat4x4 viewMatrix(1.0f);
         viewMatrix = glm::rotate(viewMatrix, -rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));

@@ -132,8 +132,8 @@ private:
         if (Keys::pressed(SDL_KeyCode::SDLK_LSHIFT)) movementSpeed *= 3.0f; // sprint button
         if (Keys::down('s')) camera.translate(0.0f, 0.0f, movementSpeed);
         if (Keys::down('w')) camera.translate(0.0f, 0.0f, -movementSpeed);
-        if (Keys::down('e')) camera.translate(0.0f, movementSpeed, 0.0f);
-        if (Keys::down('q')) camera.translate(0.0f, -movementSpeed, 0.0f);
+        //if (Keys::down('e')) camera.translate(0.0f, movementSpeed, 0.0f);
+        //if (Keys::down('q')) camera.translate(0.0f, -movementSpeed, 0.0f);
         if (Keys::down('d')) camera.translate(movementSpeed, 0.0f, 0.0f);
         if (Keys::down('a')) camera.translate(-movementSpeed, 0.0f, 0.0f);
         
