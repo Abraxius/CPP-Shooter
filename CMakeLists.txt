@@ -27,7 +27,7 @@ FetchContent_MakeAvailable(sdl3 assimp glm stb cmrc glbinding imgui sponza)
 set(ENABLE_ALL_WARNINGS OFF)
 FetchContent_Declare(jolt GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics.git" GIT_TAG "master" SOURCE_SUBDIR "build")
 FetchContent_MakeAvailable(jolt)
-set(FETCHCONTENT_FULLY_DISCONNECTED OFF CACHE BOOL "Faster config after FetchContent has run once" FORCE)
+set(FETCHCONTENT_FULLY_DISCONNECTED ON CACHE BOOL "Faster config after FetchContent has run once" FORCE)
 find_package(OpenGL REQUIRED COMPONENTS)
 
 # embedding of cmrc resources

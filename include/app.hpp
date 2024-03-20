@@ -94,7 +94,8 @@ private:
                 // bind resources to pipeline
                 lights[iLight].bind_write(face);
                 // draw models
-                model.draw();
+                //model.draw();
+                for (auto& model : models) model.draw();
                 // draw other light models
                 for (size_t i = 0; i < lights.size(); i++) {
                     if (i != iLight) lights[i].draw();
@@ -115,7 +116,8 @@ private:
         }
         // draw models
         for (auto& light : lights) light.draw();
-        model.draw();
+        //model.draw();
+        for (auto& model : models) model.draw();
     }
     void handle_inputs() {
         // draw wireframe while holding f
@@ -151,11 +153,19 @@ private:
     // render resources
     Pipeline colorPipeline = Pipeline("shaders/default.vs", "shaders/default.fs");
     Pipeline shadowPipeline = Pipeline("shaders/shadowmapping.vs", "shaders/shadowmapping.fs");
-    Model model = Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/sponza.obj");
+    //Model model = Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/ground/ground.obj");
     Camera camera = Camera({1, 2, 1}, {0, 0, 0}, window.width, window.height);
+    
     std::array<PointLight, 2> lights = {
-        PointLight({1, 2, 0}, {0, 0, 0}, {1, 1, 1}, 30.0f),
-        PointLight({2, 4, 1}, {0, 0, 0}, {1, 1, 1}, 30.0f),
+        PointLight({10, 4, 0}, {0, 0, 0}, {1, 1, 1}, 100.0f),
+        PointLight({-10, 4, 0}, {0, 0, 0}, {1, 1, 1}, 100.0f),
     };
+
+    std::array<Model, 2> models = {
+        // Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/sponza.obj"),
+        Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/ground/ground.obj"),
+        Model({4, 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
+    };
+
     //Audio audio;
 };
