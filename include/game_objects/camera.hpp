@@ -21,7 +21,7 @@ struct Camera {
     // translate relative to camera direction
     void translate(float x, float y, float z) {
         position += glm::quat(rotation) * glm::vec3(x,y,z);
-        position.y = 1.0f;
+        // position.y = 1.0f;
     }
     
     void bind() {

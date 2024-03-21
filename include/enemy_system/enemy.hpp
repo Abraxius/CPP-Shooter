@@ -31,12 +31,19 @@ struct Enemy : public Model {
         // Überprüfen Sie, ob der Spieler im Sichtfeld des Feindes ist (z.B. durch Dot-Produkt)
         float dotProduct = glm::dot(glm::normalize(toPlayer), {0,0,1});
         if (dotProduct > cos(fieldOfView / 2) && glm::length(toPlayer) < sightDistance) {
+            playerVisible = true;
             return true;
         }
+        playerVisible = true;
         return false;
     }
 
+public:
+    float movementSpeed = 2.f;
+    float damage = 20.f;
+
 private:
+    bool playerVisible;
     float health;
     float fieldOfView = 90.f;
     float sightDistance = 10.f;

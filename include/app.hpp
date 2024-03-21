@@ -144,7 +144,7 @@ private:
         player.rotation.x -= player.rotationSpeed * Mouse::delta().second;
         player.rotation.y -= player.rotationSpeed * Mouse::delta().first;
 
-        // Syn Camera and Player
+        // Sync Camera and Player
         camera.position = player.position;
         camera.rotation = player.rotation;
 
@@ -157,17 +157,27 @@ private:
         // std::cout << "Player Pos: " << player.position.y << "Y" << std::endl;
         // std::cout << "Camera Pos: " << player.position.y << "Y" << std::endl;
 
-        // spawn Enemys
+        // spawn enemys
         if (Keys::down('l')) enemySystem.spawnEnemys();
         
         //if (Keys::pressed('r')) Mix_PlayChannel(-1, audio.samples[0], 0);
     }
 
     void updateGame() {
-        // Check if player was seen by zombie
         for (auto& enemy : enemySystem.enemies) {
+            // Check if player is seen by enemy
             if (enemy.isPlayerInSight(player.position)) {
                 std::cout << "Spieler wurde vom Zombie gesehen!" << std::endl;
+                // Move Enemy towards Player
+                glm::vec3 direction = glm::normalize(player.position - enemy.transform.position);
+                float movementSpeed = timer.get_delta() * enemy.movementSpeed;
+                enemy.transform.position += direction * movementSpeed;
+            }
+            // Check if player is hit by enemy
+            float distanceToEnemy = glm::distance(player.position, enemy.transform.position);
+            float collisionRadius = 2.0f;
+            if (distanceToEnemy <= collisionRadius) {
+                player.takeDamage(enemy.damage);
             }
         }
     }
@@ -182,8 +192,8 @@ private:
     Pipeline shadowPipeline = Pipeline("shaders/shadowmapping.vs", "shaders/shadowmapping.fs");
     //Model model = Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/ground/ground.obj");
 
-    Player player = Player({1, 2, 1}, {0, 0, 0}, 100.f, 2.f, 3.f, 0.001f);
-    Camera camera = Camera({1, 2, 1}, {0, 0, 0}, window.width, window.height);
+    Player player = Player({1, 1.8f, 1}, {0, 0, 0}, 100.f, 2.f, 3.f, 0.001f);
+    Camera camera = Camera({1, 1.8f, 1}, {0, 0, 0}, window.width, window.height);
     
     std::array<PointLight, 2> lights = {
         PointLight({10, 4, 0}, {0, 0, 0}, {1, 1, 1}, 100.0f),

@@ -14,12 +14,13 @@ struct Player {
 
     void move(float x, float y, float z) {
         position += glm::quat(rotation) * glm::vec3(x,y,z);
-        position.y = 1.0f;
+        position.y = 1.8f;
     }
 
-    void hit(int damage) {
+    void takeDamage(int damage) {
         std::cout << "Player hit! (" << damage << "damage)" << std::endl;
         health = health - damage;
+        std::cout << "Player HP: " << health << std::endl;
         if(health <= 0) die();
     }
     void die() {
