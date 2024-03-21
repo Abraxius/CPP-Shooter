@@ -10,16 +10,16 @@
 
 struct EnemySystem {
     EnemySystem(int count) {
-        numberOfEnemys = count;
+        numberOfEnemies = count;
     }
 
     void spawnEnemys() {
-        for (int i = 0; i < numberOfEnemys; i++) {
-            enemys.insert(enemys.end(), Enemy({2 + (i + 2), 1, 1}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj", 100));
+        for (int i = 0; i < numberOfEnemies; i++) {
+            enemies.insert(enemies.end(), Enemy({2 + (i + 2), 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj", 100));
         }
     }
 
 public:
-    std::list<Enemy> enemys;
-    int numberOfEnemys;
+    std::list<Enemy> enemies;
+    int numberOfEnemies;
 };

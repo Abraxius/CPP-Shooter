@@ -51,6 +51,8 @@ struct App {
             draw_ui();
             imgui_end();
 
+            updateGame();
+
             // present drawn frame to the screen
             window.swap();
         }
@@ -98,7 +100,7 @@ private:
                 //model.draw();
                 for (auto& model : models) model.draw();
                 // draw Enemys
-                for (auto& enemy : enemySystem.enemys) enemy.draw();
+                for (auto& enemy : enemySystem.enemies) enemy.draw();
                 // draw other light models
                 for (size_t i = 0; i < lights.size(); i++) {
                     if (i != iLight) lights[i].draw();
@@ -122,7 +124,7 @@ private:
         //model.draw();
         for (auto& model : models) model.draw();
 
-        for (auto& enemy : enemySystem.enemys) enemy.draw();
+        for (auto& enemy : enemySystem.enemies) enemy.draw();
     }
     void handle_inputs() {
         // draw wireframe while holding f
@@ -153,6 +155,17 @@ private:
         camera.rotation.y -= rotationSpeed * Mouse::delta().first;
     }
 
+    void updateGame() {
+    // Check if player was seen by enemy
+    for (auto& enemy : enemySystem.enemies) {
+        if (enemy.isPlayerInSight(camera.position)) {
+            std::cout << "Spieler wurde vom Feind gesehen! Spiel verloren." << std::endl;
+            // close game when lost
+            // bRunning = false;
+        }
+    }
+    }
+
 private:
     Timer timer;
     Window window = Window(1280, 720, 4);
@@ -177,7 +190,7 @@ private:
         // Model({2, 1, 1}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
     };
 
-    EnemySystem enemySystem = EnemySystem(8);
+    EnemySystem enemySystem = EnemySystem(1);
 
     //Audio audio;
 };

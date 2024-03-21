@@ -23,6 +23,21 @@ struct Enemy : public Model {
         std::cout << "Enemy died!" << std::endl;
     }
 
-public:
+     // Methode zur Überprüfung, ob der Spieler im Sichtfeld des Feindes ist
+    bool isPlayerInSight(glm::vec3 playerPosition) {
+        // Pseudocode: Überprüfen, ob der Spieler im Sichtfeld und innerhalb der Sichtweite des Feindes ist
+        // Berechnen Sie den Vektor vom Feind zum Spieler
+        glm::vec3 toPlayer = playerPosition - this->transform.position;
+        // Überprüfen Sie, ob der Spieler im Sichtfeld des Feindes ist (z.B. durch Dot-Produkt)
+        float dotProduct = glm::dot(glm::normalize(toPlayer), {0,0,1});
+        if (dotProduct > cos(fieldOfView / 2) && glm::length(toPlayer) < sightDistance) {
+            return true;
+        }
+        return false;
+    }
+
+private:
     int health;
+    float fieldOfView = 90.f;
+    float sightDistance = 10.f;
 };
