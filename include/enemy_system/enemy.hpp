@@ -11,7 +11,7 @@
 #include "game_objects/model.hpp"
 
 struct Enemy : public Model {
-    Enemy(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, std::string path, int health)
+    Enemy(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, std::string path, float health)
         : Model(pos, rot, scale, path), health(health) {}
 
     void hit(int damage) {
@@ -37,7 +37,7 @@ struct Enemy : public Model {
     }
 
 private:
-    int health;
+    float health;
     float fieldOfView = 90.f;
     float sightDistance = 10.f;
 };

@@ -22,6 +22,7 @@ using namespace gl;
 #include "game_objects/lights/light_point.hpp"
 #include "game_objects/camera.hpp"
 #include "enemy_system/enemy_system.hpp"
+#include "game_objects/player.hpp"
 #include <Jolt/Jolt.h>
 
 struct App {
@@ -97,7 +98,6 @@ private:
                 // bind resources to pipeline
                 lights[iLight].bind_write(face);
                 // draw models
-                //model.draw();
                 for (auto& model : models) model.draw();
                 // draw Enemys
                 for (auto& enemy : enemySystem.enemies) enemy.draw();
@@ -121,7 +121,6 @@ private:
         }
         // draw models
         for (auto& light : lights) light.draw();
-        //model.draw();
         for (auto& model : models) model.draw();
 
         for (auto& enemy : enemySystem.enemies) enemy.draw();
@@ -135,24 +134,33 @@ private:
         if (Keys::pressed(SDL_KeyCode::SDLK_ESCAPE)) SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode());
 
         // camera movement
-        float movementSpeed = timer.get_delta() * 2.0f; // scale speed relative to framerate
-        if (Keys::pressed(SDL_KeyCode::SDLK_LSHIFT)) movementSpeed *= 3.0f; // sprint button
-        if (Keys::down('s')) camera.translate(0.0f, 0.0f, movementSpeed);
-        if (Keys::down('w')) camera.translate(0.0f, 0.0f, -movementSpeed);
-        //if (Keys::down('e')) camera.translate(0.0f, movementSpeed, 0.0f);
-        //if (Keys::down('q')) camera.translate(0.0f, -movementSpeed, 0.0f);
-        if (Keys::down('d')) camera.translate(movementSpeed, 0.0f, 0.0f);
-        if (Keys::down('a')) camera.translate(-movementSpeed, 0.0f, 0.0f);
+        float movementSpeed = timer.get_delta() * player.movementSpeed; // scale speed relative to framerate
+        if (Keys::pressed(SDL_KeyCode::SDLK_LSHIFT)) movementSpeed *= player.sprintSpeed; // sprint button
+        if (Keys::down('s')) player.move(0.0f, 0.0f, movementSpeed);
+        if (Keys::down('w')) player.move(0.0f, 0.0f, -movementSpeed);
+        if (Keys::down('d')) player.move(movementSpeed, 0.0f, 0.0f);
+        if (Keys::down('a')) player.move(-movementSpeed, 0.0f, 0.0f);
+        
+        player.rotation.x -= player.rotationSpeed * Mouse::delta().second;
+        player.rotation.y -= player.rotationSpeed * Mouse::delta().first;
+
+        // Syn Camera and Player
+        camera.position = player.position;
+        camera.rotation = player.rotation;
+
+        // Log for Debugging
+        // std::cout << "Move Speed: " << player.movementSpeed << std::endl;
+        // std::cout << "Rot Speed: " << player.rotationSpeed << std::endl;
+        // std::cout << "Sprint Speed: " << player.sprintSpeed << std::endl;
+        // std::cout << "Player Pos: " << player.position.x << "X" << std::endl;
+        // std::cout << "Camera Pos: " << player.position.x << "X" << std::endl;
+        // std::cout << "Player Pos: " << player.position.y << "Y" << std::endl;
+        // std::cout << "Camera Pos: " << player.position.y << "Y" << std::endl;
 
         // spawn Enemys
         if (Keys::down('l')) enemySystem.spawnEnemys();
         
         //if (Keys::pressed('r')) Mix_PlayChannel(-1, audio.samples[0], 0);
-
-        // camera rotation
-        float rotationSpeed = 0.001f;
-        camera.rotation.x -= rotationSpeed * Mouse::delta().second;
-        camera.rotation.y -= rotationSpeed * Mouse::delta().first;
     }
 
     void updateGame() {
@@ -175,6 +183,8 @@ private:
     Pipeline colorPipeline = Pipeline("shaders/default.vs", "shaders/default.fs");
     Pipeline shadowPipeline = Pipeline("shaders/shadowmapping.vs", "shaders/shadowmapping.fs");
     //Model model = Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/ground/ground.obj");
+
+    Player player = Player({1, 2, 1}, {0, 0, 0}, 100.f, 2.f, 3.f, 0.001f);
     Camera camera = Camera({1, 2, 1}, {0, 0, 0}, window.width, window.height);
     
     std::array<PointLight, 2> lights = {
