@@ -21,6 +21,7 @@ using namespace gl;
 #include "game_objects/model.hpp"
 #include "game_objects/lights/light_point.hpp"
 #include "game_objects/camera.hpp"
+#include "enemy_system/enemy_system.hpp"
 #include <Jolt/Jolt.h>
 
 struct App {
@@ -96,6 +97,8 @@ private:
                 // draw models
                 //model.draw();
                 for (auto& model : models) model.draw();
+                // draw Enemys
+                for (auto& enemy : enemySystem.enemys) enemy.draw();
                 // draw other light models
                 for (size_t i = 0; i < lights.size(); i++) {
                     if (i != iLight) lights[i].draw();
@@ -118,6 +121,8 @@ private:
         for (auto& light : lights) light.draw();
         //model.draw();
         for (auto& model : models) model.draw();
+
+        for (auto& enemy : enemySystem.enemys) enemy.draw();
     }
     void handle_inputs() {
         // draw wireframe while holding f
@@ -136,6 +141,9 @@ private:
         //if (Keys::down('q')) camera.translate(0.0f, -movementSpeed, 0.0f);
         if (Keys::down('d')) camera.translate(movementSpeed, 0.0f, 0.0f);
         if (Keys::down('a')) camera.translate(-movementSpeed, 0.0f, 0.0f);
+
+        // spawn Enemys
+        if (Keys::down('l')) enemySystem.spawnEnemys();
         
         //if (Keys::pressed('r')) Mix_PlayChannel(-1, audio.samples[0], 0);
 
@@ -161,11 +169,15 @@ private:
         PointLight({-10, 4, 0}, {0, 0, 0}, {1, 1, 1}, 100.0f),
     };
 
-    std::array<Model, 2> models = {
+    std::array<Model, 1> models = {
         // Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/sponza.obj"),
         Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/ground/ground.obj"),
-        Model({4, 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
+        // Model({2, 0, 0}, {0, 0, 0}, {10, 10, 10}, "models/zombie/zombie.obj"),
+        // Model({4, 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
+        // Model({2, 1, 1}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
     };
+
+    EnemySystem enemySystem = EnemySystem(8);
 
     //Audio audio;
 };
