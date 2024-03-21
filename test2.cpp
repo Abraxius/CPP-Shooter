@@ -1,6 +1,7 @@
 #pragma once
 
 #include "game_objects/character_controller.hpp"
+// #include "game_objects/layers.hpp"
 
 
 // External libraries
@@ -47,7 +48,7 @@ using namespace gl;
 #include <thread>
 
 // Disable common warnings triggered by Jolt, you can use JPH_SUPPRESS_WARNING_PUSH / JPH_SUPPRESS_WARNING_POP to store and restore the warning state
-// JPH_SUPPRESS_WARNINGS
+JPH_SUPPRESS_WARNINGS
 
 // All Jolt symbols are in the JPH namespace
 using namespace JPH;
@@ -55,19 +56,8 @@ using namespace JPH;
 // If you want your code to compile using single or double precision write 0.0_r to get a Real value that compiles to double or float depending if JPH_DOUBLE_PRECISION is set or not.
 using namespace JPH::literals;
 
-namespace Layers
-{
-	static constexpr ObjectLayer NON_MOVING = 0;
-	static constexpr ObjectLayer MOVING = 1;
-	static constexpr ObjectLayer NUM_LAYERS = 2;
-};
-
-namespace BroadPhaseLayers
-{
-	static constexpr BroadPhaseLayer NON_MOVING(0);
-	static constexpr BroadPhaseLayer MOVING(1);
-	static constexpr uint NUM_LAYERS(2);
-};
+// We're also using STL classes in this example
+// using namespace std;
 
 // Callback for traces, connect this to your own trace function if you have one
 static void TraceImpl(const char *inFMT, ...)
@@ -82,6 +72,62 @@ static void TraceImpl(const char *inFMT, ...)
 	// Print to the TTY
 	std::cout << buffer << std::endl;
 }
+
+#ifdef JPH_ENABLE_ASSERTS
+
+// Callback for asserts, connect this to your own assert handler if you have one
+static bool AssertFailedImpl(const char *inExpression, const char *inMessage, const char *inFile, uint inLine)
+{
+	// Print to the TTY
+	std::cout << inFile << ":" << inLine << ": (" << inExpression << ") " << (inMessage != nullptr? inMessage : "") << std::endl;
+
+	// Breakpoint
+	return true;
+};
+
+#endif // JPH_ENABLE_ASSERTS
+
+// Layer that objects can be in, determines which other objects it can collide with
+// Typically you at least want to have 1 layer for moving bodies and 1 layer for static bodies, but you can have more
+// layers if you want. E.g. you could have a layer for high detail collision (which is not used by the physics simulation
+// but only if you do collision testing).
+namespace Layers
+{
+	static constexpr ObjectLayer NON_MOVING = 0;
+	static constexpr ObjectLayer MOVING = 1;
+	static constexpr ObjectLayer NUM_LAYERS = 2;
+};
+
+/// Class that determines if two object layers can collide
+class ObjectLayerPairFilterImpl : public ObjectLayerPairFilter
+{
+public:
+	virtual bool					ShouldCollide(ObjectLayer inObject1, ObjectLayer inObject2) const override
+	{
+		switch (inObject1)
+		{
+		case Layers::NON_MOVING:
+			return inObject2 == Layers::MOVING; // Non moving only collides with moving
+		case Layers::MOVING:
+			return true; // Moving collides with everything
+		default:
+			JPH_ASSERT(false);
+			return false;
+		}
+	}
+};
+
+// Each broadphase layer results in a separate bounding volume tree in the broad phase. You at least want to have
+// a layer for non-moving and moving objects to avoid having to update a tree full of static objects every frame.
+// You can have a 1-on-1 mapping between object layers and broadphase layers (like in this case) but if you have
+// many object layers you'll be creating many broad phase trees, which is not efficient. If you want to fine tune
+// your broadphase layers define JPH_TRACK_BROADPHASE_STATS and look at the stats reported on the TTY.
+namespace BroadPhaseLayers
+{
+	static constexpr BroadPhaseLayer NON_MOVING(0);
+	static constexpr BroadPhaseLayer MOVING(1);
+	static constexpr uint NUM_LAYERS(2);
+};
 
 // BroadPhaseLayerInterface implementation
 // This defines a mapping between object and broadphase layers.
@@ -170,25 +216,6 @@ public:
 	}
 };
 
-/// Class that determines if two object layers can collide
-class ObjectLayerPairFilterImpl : public ObjectLayerPairFilter
-{
-public:
-	virtual bool					ShouldCollide(ObjectLayer inObject1, ObjectLayer inObject2) const override
-	{
-		switch (inObject1)
-		{
-		case Layers::NON_MOVING:
-			return inObject2 == Layers::MOVING; // Non moving only collides with moving
-		case Layers::MOVING:
-			return true; // Moving collides with everything
-		default:
-			JPH_ASSERT(false);
-			return false;
-		}
-	}
-};
-
 // An example activation listener
 class MyBodyActivationListener : public BodyActivationListener
 {
@@ -213,8 +240,6 @@ struct App {
         glNamedFramebufferDrawBuffer(shadowPipeline.framebuffer, GL_NONE);
 
         // start_physics();
-        // CharacterController characterController = CharacterController();
-        setupPhysicsScene(300.0f);
     }
 
     int run() {
@@ -325,7 +350,7 @@ private:
         if (Keys::down('a')) camera.translate(-movementSpeed, 0.0f, 0.0f);
 
         // start physics
-        // if (Keys::down('p')) start_physics();
+        if (Keys::down('p')) start_physics();
         
         // if (Keys::pressed('r')) Mix_PlayChannel(-1, audio.samples[0], 0);
 
@@ -334,8 +359,7 @@ private:
         camera.rotation.x -= rotationSpeed * Mouse::delta().second;
         camera.rotation.y -= rotationSpeed * Mouse::delta().first;
     }
-    
-    void setupPhysicsScene(float floorSize) {
+    void start_physics() {
         // Register allocation hook. In this example we'll just let Jolt use malloc / free but you can override these if you want (see Memory.h).
         // This needs to be done before any other Jolt function is called.
         RegisterDefaultAllocator();
@@ -359,8 +383,13 @@ private:
         // If you don't want to pre-allocate you can also use TempAllocatorMalloc to fall back to
         // malloc / free.
         TempAllocatorImpl temp_allocator(10 * 1024 * 1024);
+
+        // We need a job system that will execute physics jobs on multiple threads. Typically
+        // you would implement the JobSystem interface yourself and let Jolt Physics run on top
+        // of your own job scheduler. JobSystemThreadPool is an example implementation.
         JobSystemThreadPool job_system(cMaxPhysicsJobs, cMaxPhysicsBarriers, thread::hardware_concurrency() - 1);
-                // This is the max amount of rigid bodies that you can add to the physics system. If you try to add more you'll get an error.
+
+        // This is the max amount of rigid bodies that you can add to the physics system. If you try to add more you'll get an error.
         // Note: This value is low because this is a simple test. For a real project use something in the order of 65536.
         const uint cMaxBodies = 1024;
 
@@ -410,60 +439,81 @@ private:
         // variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
         BodyInterface &body_interface = physics_system.GetBodyInterface();
 
-        const float scale = 1.0f;
+        // Next we can create a rigid body to serve as the floor, we make a large box
+        // Create the settings for the collision volume (the shape).
+        // Note that for simple shapes (like boxes) you can also directly construct a BoxShape.
+        BoxShapeSettings floor_shape_settings(Vec3(100.0f, 1.0f, 100.0f));
 
-        Body *floor = body_interface.CreateBody(BodyCreationSettings(new BoxShape(scale * Vec3(0.5f * floorSize, 1.0f, 0.5f * floorSize), 0.0f), RVec3(scale * Vec3(0.0f, -1.0f, 0.0f)), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING));
-	    body_interface.AddBody(floor->GetID(), EActivation::DontActivate);
+        // Create the shape
+        ShapeSettings::ShapeResult floor_shape_result = floor_shape_settings.Create();
+        ShapeRefC floor_shape = floor_shape_result.Get(); // We don't expect an error here, but you can check floor_shape_result for HasError() / GetError()
 
-        Model monkey2 = Model({5, 2, 1}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/monkey.obj");
-        models.insert(models.begin(), monkey2);
+        // Create the settings for the body itself. Note that here you can also set other properties like the restitution / friction.
+        BodyCreationSettings floor_settings(floor_shape, RVec3(0.0_r, -1.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING);
 
-        Model monkeyBig = Model({2, 20, 10}, {0, 0, 0}, {.04, .04, .04}, "models/sponza/monkey.obj");
-        models.insert(models.begin(), monkeyBig);
+        // Create the actual rigid body
+        Body *floor = body_interface.CreateBody(floor_settings); // Note that if we run out of bodies this can return nullptr
 
-	// We simulate the physics world in discrete time steps. 60 Hz is a good rate to update the physics system.
-	const float cDeltaTime = 1.0f / 60.0f;
+        // Add it to the world
+        body_interface.AddBody(floor->GetID(), EActivation::DontActivate);
 
-	// Optional step: Before starting the physics simulation you can optimize the broad phase. This improves collision detection performance (it's pointless here because we only have 2 bodies).
-	// You should definitely not call this every frame or when e.g. streaming in a new level section as it is an expensive operation.
-	// Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
-	physics_system.OptimizeBroadPhase();
+        // Now create a dynamic body to bounce on the floor
+        // Note that this uses the shorthand version of creating and adding a body to the world
+        BodyCreationSettings sphere_settings(new SphereShape(0.5f), RVec3(0.0_r, 5.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
+        BodyID sphere_id = body_interface.CreateAndAddBody(sphere_settings, EActivation::Activate);
 
-	// Now we're ready to simulate the body, keep simulating until it goes to sleep
-	// uint step = 0;
-	// while (body_interface.IsActive(sphere_id))
-	// {
-	// 	// Next step
-	// 	++step;
+        // Now you can interact with the dynamic body, in this case we're going to give it a velocity.
+        // (note that if we had used CreateBody then we could have set the velocity straight on the body before adding it to the physics system)
+        body_interface.SetLinearVelocity(sphere_id, Vec3(0.0f, -1.0f, 0.0f));
 
-	// 	// Output current position and velocity of the sphere
-	// 	RVec3 position = body_interface.GetCenterOfMassPosition(sphere_id);
-	// 	Vec3 velocity = body_interface.GetLinearVelocity(sphere_id);
-	// 	std::cout << "Step " << step << ": Position = (" << position.GetX() << ", " << position.GetY() << ", " << position.GetZ() << "), Velocity = (" << velocity.GetX() << ", " << velocity.GetY() << ", " << velocity.GetZ() << ")" << std::endl;
+        // We simulate the physics world in discrete time steps. 60 Hz is a good rate to update the physics system.
+        const float cDeltaTime = 1.0f / 60.0f;
 
-	// 	// If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable. Do 1 collision step per 1 / 60th of a second (round up).
-	// 	const int cCollisionSteps = 1;
+        // Optional step: Before starting the physics simulation you can optimize the broad phase. This improves collision detection performance (it's pointless here because we only have 2 bodies).
+        // You should definitely not call this every frame or when e.g. streaming in a new level section as it is an expensive operation.
+        // Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
+        physics_system.OptimizeBroadPhase();
 
-	// 	// Step the world
-	// 	physics_system.Update(cDeltaTime, cCollisionSteps, &temp_allocator, &job_system);
-	// }
+        // Now we're ready to simulate the body, keep simulating until it goes to sleep
+        uint step = 0;
+        while (body_interface.IsActive(sphere_id))
+        {
+            // Next step
+            ++step;
 
-	// // Remove the sphere from the physics system. Note that the sphere itself keeps all of its state and can be re-added at any time.
-	// body_interface.RemoveBody(sphere_id);
+            std::cout << "Model " << monkey.transform.position.x << std::endl;
 
-	// // Destroy the sphere. After this the sphere ID is no longer valid.
-	// body_interface.DestroyBody(sphere_id);
+            // Output current position and velocity of the sphere
+            RVec3 position = body_interface.GetCenterOfMassPosition(sphere_id);
+            Vec3 velocity = body_interface.GetLinearVelocity(sphere_id);
+            std::cout << "Step " << step << ": Position = (" << position.GetX() << ", " << position.GetY() << ", " << position.GetZ() << "), Velocity = (" << velocity.GetX() << ", " << velocity.GetY() << ", " << velocity.GetZ() << ")" << std::endl;
 
-	// // Remove and destroy the floor
-	// body_interface.RemoveBody(floor->GetID());
-	// body_interface.DestroyBody(floor->GetID());
+            // If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable. Do 1 collision step per 1 / 60th of a second (round up).
+            const int cCollisionSteps = 1;
 
-	// // Unregisters all types with the factory and cleans up the default material
-	// UnregisterTypes();
+            // Step the world
+            physics_system.Update(cDeltaTime, cCollisionSteps, &temp_allocator, &job_system);
+        }
 
-	// // Destroy the factory
-	// delete Factory::sInstance;
-	// Factory::sInstance = nullptr;
+        // Remove the sphere from the physics system. Note that the sphere itself keeps all of its state and can be re-added at any time.
+        body_interface.RemoveBody(sphere_id);
+
+        // Destroy the sphere. After this the sphere ID is no longer valid.
+        body_interface.DestroyBody(sphere_id);
+
+        // Remove and destroy the floor
+        body_interface.RemoveBody(floor->GetID());
+        body_interface.DestroyBody(floor->GetID());
+
+        // Unregisters all types with the factory and cleans up the default material
+        UnregisterTypes();
+
+        // Destroy the factory
+        delete Factory::sInstance;
+        Factory::sInstance = nullptr;
+    }
+
+    void pushObject() {
 
     }
 
@@ -476,35 +526,21 @@ private:
     Pipeline colorPipeline = Pipeline("shaders/default.vs", "shaders/default.fs");
     Pipeline shadowPipeline = Pipeline("shaders/shadowmapping.vs", "shaders/shadowmapping.fs");
     // Model model = Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/sponza.obj");
-    // Model monkey = Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/monkey.obj");
+    Model monkey = Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/monkey.obj");
     Camera camera = Camera({1, 2, 1}, {0, 0, 0}, window.width, window.height);
     std::array<PointLight, 2> lights = {
         PointLight({1, 2, 0}, {0, 0, 0}, {1, 1, 1}, 30.0f),
         PointLight({2, 4, 1}, {0, 0, 0}, {1, 1, 1}, 30.0f),
     };
 
-    // std::array<Model, 2> models = {
-    //     // Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/sponza.obj"),
-    //     Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/ground/ground.obj"),
-    //     Model({4, 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
-    // };
-
-    std::list<Model> models = {
+    std::array<Model, 2> models = {
         // Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/sponza.obj"),
         Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/ground/ground.obj"),
         Model({4, 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
     };
 
     // CharacterController characterController = CharacterController();
-    // BodyInterface *	mBodyInterface;
 
 
     // Audio audio;
-
-protected:
-	// JobSystem *		mJobSystem = nullptr;
-	// PhysicsSystem *	mPhysicsSystem = nullptr;
-	// BodyInterface *	mBodyInterface = nullptr;
-	// DebugRenderer *	mDebugRenderer = nullptr;
-	// TempAllocator *	mTempAllocator = nullptr;
 };

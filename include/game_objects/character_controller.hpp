@@ -1,14 +1,40 @@
 #pragma once
 
-#include <TestFramework/TestFramework.h>
-// #include <Jolt/Jolt.h>
-// #include <Jolt/Core/Reference.h>
-#include <Jolt/Physics/Character/Character.h>
+// #include <TestFramework/TestFramework.h>
+// #include <Samples/Tests/Test.h>
+// #include <Samples/Tests/Character/CharacterBaseTest.h>
+
+// #include <Samples/Layers.h>
+// // #include <Jolt/Jolt.h>
+// // #include <Jolt/Core/Reference.h>
+// #include <Jolt/Physics/Character/Character.h>
 // #include <Jolt/Physics/Character/CharacterBase.h>
 
 // #include <TestFramework.h>
 // #include <Layers.h>
 // #include <Renderer/DebugRendererImp.h>
+
+#include <Jolt/Jolt.h>
+#include <Jolt/Physics/Body/BodyCreationSettings.h>
+#include <Jolt/Physics/Body/BodyLock.h>
+#include <Jolt/Physics/Collision/CollideShape.h>
+#include <Jolt/Physics/Character/Character.h>
+#include <Jolt/Physics/PhysicsSystem.h>
+#include <Jolt/ObjectStream/TypeDeclarations.h>
+#include <Jolt/Physics/Character/CharacterVirtual.h>
+
+
+using namespace JPH;
+using namespace JPH::literals;
+
+// namespace Layers
+// {
+// 	static constexpr ObjectLayer NON_MOVING = 0;
+// 	static constexpr ObjectLayer MOVING = 1;
+// 	static constexpr ObjectLayer NUM_LAYERS = 2;
+// };
+
+
 
 struct CharacterController {
     // JPH_IMPLEMENT_RTTI_VIRTUAL(CharacterController)
@@ -22,7 +48,7 @@ struct CharacterController {
         // Create 'player' character
         Ref<CharacterSettings> settings = new CharacterSettings();
         settings->mMaxSlopeAngle = DegreesToRadians(45.0f);
-        settings->mLayer = Layers::MOVING;
+        settings->mLayer = 5;
         settings->mShape = mStandingShape;
         settings->mFriction = 0.5f;
         settings->mSupportingVolume = Plane(Vec3::sAxisY(), -cCharacterRadiusStanding); // Accept contacts that touch the lower sphere of the capsule
@@ -37,10 +63,10 @@ struct CharacterController {
     //     DrawCharacterState(mCharacter, mCharacter->GetWorldTransform(), mCharacter->GetLinearVelocity());
     // }
 
-    // void PostPhysicsUpdate(float inDeltaTime){
-    //     // Fetch the new ground properties
-    //     mCharacter->PostSimulation(cCollisionTolerance);
-    // }
+    void PostPhysicsUpdate(float inDeltaTime){
+        // Fetch the new ground properties
+        mCharacter->PostSimulation(cCollisionTolerance);
+    }
 
     // void SaveState(StateRecorder &inStream) const {
     //     // CharacterBaseTest::SaveState(inStream);
@@ -110,4 +136,20 @@ struct CharacterController {
     // }
 
     float cCollisionTolerance = 0.05f;
+
+    // Character size
+	static constexpr float	cCharacterHeightStanding = 1.35f;
+	static constexpr float	cCharacterRadiusStanding = 0.3f;
+	static constexpr float	cCharacterHeightCrouching = 0.8f;
+	static constexpr float	cCharacterRadiusCrouching = 0.3f;
+
+private:
+	// The 'player' character
+	Ref<Character>			mCharacter;
+
+    // The different stances for the character
+	RefConst<Shape>			mStandingShape;
+	RefConst<Shape>			mCrouchingShape;
+
+    PhysicsSystem * mPhysicsSystem = new PhysicsSystem();
 };
