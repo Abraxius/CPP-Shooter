@@ -164,14 +164,12 @@ private:
     }
 
     void updateGame() {
-    // Check if player was seen by enemy
-    for (auto& enemy : enemySystem.enemies) {
-        if (enemy.isPlayerInSight(camera.position)) {
-            std::cout << "Spieler wurde vom Feind gesehen! Spiel verloren." << std::endl;
-            // close game when lost
-            // bRunning = false;
+        // Check if player was seen by zombie
+        for (auto& enemy : enemySystem.enemies) {
+            if (enemy.isPlayerInSight(player.position)) {
+                std::cout << "Spieler wurde vom Zombie gesehen!" << std::endl;
+            }
         }
-    }
     }
 
 private:
