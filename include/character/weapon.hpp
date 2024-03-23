@@ -2,17 +2,19 @@
 
 struct Weapon
 {
-    bool isReloading;
-    bool isAutomatic;
-    bool isFired;
-    bool isAim;
+    bool isReloading = false;
+    bool isAutomatic = false;
+    bool isFired = false;
+    bool isAim = false;
 
-    unsigned int shotRate;
-    unsigned int lastShot;
+    unsigned int shotRate = 200;
+    unsigned int lastShot = 200;
     unsigned int bullets = 6;
     unsigned int magazine = 6;
     unsigned int availableBullets = 30;
 
+    unsigned int currentReloadTime = 0;
+    unsigned int reloadTime = 300;
     // ToDo: für später
     // float precision;
     // float aimPrecision;
@@ -54,14 +56,15 @@ struct Weapon
 
                     return 1;
                 }
-            }
-            else
-            {
-                // Mix_PlayChannel(-1,emptysound,0);
-                reload();
-                return 0;
+                else
+                {
+                    // Mix_PlayChannel(-1,emptysound,0);
+                    reload();
+                    return 0;
+                }
             }
         }
+        return 0;
     }
 
     void noFire()
@@ -84,7 +87,7 @@ struct Weapon
                 bullets = availableBullets + bullets;
                 availableBullets = 0;
             }
-            std::cout << "Nachgeladen: " << bullets << std::endl;
+            std::cout << "Lädt nach!" << std::endl;
             // Mix_PlayChannel(-1,reloadsound,0);
             return true;
         }
@@ -93,7 +96,17 @@ struct Weapon
 
     void update()
     {
-        lastShot++;
+        if (!isReloading)
+            lastShot++;
+        else {
+            if (currentReloadTime >= reloadTime) {
+                currentReloadTime = 0;
+                std::cout << "Nachgeladen: " << bullets << std::endl;
+                isReloading = false;
+            } else {
+                currentReloadTime++;
+            }
+        }
     }
 
     void addBullets(unsigned int num)

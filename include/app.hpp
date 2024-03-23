@@ -61,6 +61,8 @@ struct App
             draw_ui();
             imgui_end();
 
+            weapon.update();
+
             // present drawn frame to the screen
             window.swap();
         }
@@ -196,6 +198,9 @@ private:
 
         // if (Keys::pressed('r')) Mix_PlayChannel(-1, audio.samples[0], 0);
 
+        if (Keys::down('r'))
+                weapon.reload();
+
         if (Mouse::down('1') || Keys::down('x'))
         {
             Ray ray = raycastHit.getRaycast(window, camera);   
@@ -203,12 +208,11 @@ private:
             if(weapon.fire()) {
                 raycastHit.isCollision(ray, sphereTest);
             }
-
-            raycastHit.isCollision(ray, sphereTest);
-
-            //weapon.noFire();
-            //-------------------------------------------------------------------------
+            else {
+                weapon.noFire();
+            }
         }
+        
         // camera rotation
         float rotationSpeed = 0.001f;
         camera.rotation.x -= rotationSpeed * Mouse::delta().second;
