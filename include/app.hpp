@@ -72,7 +72,9 @@ private:
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
     void draw_ui() {
+        // Performance stats
         ImGui::SetNextWindowBgAlpha(0.35f);
+        ImGui::SetNextWindowPos({20, 20});
         ImGui::Begin("FPS_Overlay", nullptr, ImGuiWindowFlags_NoDecoration
             | ImGuiWindowFlags_NoDocking
             | ImGuiWindowFlags_NoSavedSettings
@@ -80,6 +82,32 @@ private:
             | ImGuiWindowFlags_NoNav);
         ImGui::Text("%.1f fps", ImGui::GetIO().Framerate);
         ImGui::Text("%.1f ms", ImGui::GetIO().DeltaTime * 1000.0f);
+        ImGui::End();
+
+        // Player stats
+        ImVec2 player_window_size = {200, 150};
+        ImGui::SetNextWindowPos({ImGui::GetIO().DisplaySize.x - (player_window_size.x + 20), ImGui::GetIO().DisplaySize.y - (player_window_size.y + 20)});
+        ImGui::SetNextWindowSize({200, 150});
+        ImGui::Begin("Player stats", nullptr, ImGuiWindowFlags_NoDecoration
+            | ImGuiWindowFlags_NoDocking
+            | ImGuiWindowFlags_NoSavedSettings
+            | ImGuiWindowFlags_NoFocusOnAppearing
+            | ImGuiWindowFlags_NoNav);
+        ImGui::Text("Player");
+        ImGui::Text("%.1f HP", player.health);
+        ImGui::End();
+
+        // Gameplay info
+        ImVec2 gameplay_window_size = {250, 100};
+        ImGui::SetNextWindowPos({ImGui::GetIO().DisplaySize.x - (gameplay_window_size.x + 20), 20});
+        ImGui::SetNextWindowSize({250, 100});
+        ImGui::Begin("Gameplay info", nullptr, ImGuiWindowFlags_NoDecoration
+            | ImGuiWindowFlags_NoDocking
+            | ImGuiWindowFlags_NoSavedSettings
+            | ImGuiWindowFlags_NoFocusOnAppearing
+            | ImGuiWindowFlags_NoNav);
+        ImGui::Text("%d Zombies left", enemySystem.enemies.size());
+        ImGui::Text("%d Zombies killed", player.zombiesKilled);
         ImGui::End();
     }
     void draw() {

@@ -28,13 +28,15 @@ struct Player {
     }
 
 public:
+    float health;
+
     float movementSpeed;
     float sprintSpeed;
     float rotationSpeed;
 
+    int zombiesKilled = 0;
+
     glm::vec3 position;
     glm::vec3 rotation; // euler rotation
-
-private:
-    float health;
+    
 };
