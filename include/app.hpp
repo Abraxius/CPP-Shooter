@@ -17,7 +17,7 @@ using namespace gl;
 #include "pipeline.hpp"
 #include "input.hpp"
 #include "timer.hpp"
-#include "audio.hpp"
+// #include "audio.hpp"
 #include "game_objects/model.hpp"
 #include "game_objects/lights/light_point.hpp"
 #include "game_objects/camera.hpp"
@@ -94,7 +94,7 @@ private:
                 // bind resources to pipeline
                 lights[iLight].bind_write(face);
                 // draw models
-                model.draw();
+                for (auto& model : models) model.draw();
                 // draw other light models
                 for (size_t i = 0; i < lights.size(); i++) {
                     if (i != iLight) lights[i].draw();
@@ -115,7 +115,7 @@ private:
         }
         // draw models
         for (auto& light : lights) light.draw();
-        model.draw();
+        for (auto& model : models) model.draw();
     }
     void handle_inputs() {
         // draw wireframe while holding f
