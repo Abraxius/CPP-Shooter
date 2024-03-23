@@ -135,7 +135,7 @@ private:
         if (Keys::down('d')) camera.translate(movementSpeed, 0.0f, 0.0f);
         if (Keys::down('a')) camera.translate(-movementSpeed, 0.0f, 0.0f);
         
-        if (Keys::pressed('r')) Mix_PlayChannel(-1, audio.samples[0], 0);
+        // if (Keys::pressed('r')) Mix_PlayChannel(-1, audio.samples[0], 0);
 
         // camera rotation
         float rotationSpeed = 0.001f;
@@ -157,5 +157,5 @@ private:
         PointLight({1, 2, 0}, {0, 0, 0}, {1, 1, 1}, 30.0f),
         PointLight({2, 4, 1}, {0, 0, 0}, {1, 1, 1}, 30.0f),
     };
-    Audio audio;
+    // Audio audio;
 };
