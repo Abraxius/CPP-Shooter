@@ -157,5 +157,14 @@ private:
         PointLight({1, 2, 0}, {0, 0, 0}, {1, 1, 1}, 30.0f),
         PointLight({2, 4, 1}, {0, 0, 0}, {1, 1, 1}, 30.0f),
     };
+
+    std::array<Model, 1> models = {
+        // Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/sponza.obj"),
+        Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/ground/ground.obj"),
+        // Model({2, 0, 0}, {0, 0, 0}, {10, 10, 10}, "models/zombie/zombie.obj"),
+        // Model({4, 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
+        // Model({2, 1, 1}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
+    };
+    
     // Audio audio;
 };
