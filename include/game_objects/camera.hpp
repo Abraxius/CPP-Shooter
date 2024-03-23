@@ -5,7 +5,6 @@
 #include <glm/gtx/euler_angles.hpp>     // https://glm.g-truc.net/0.9.1/api/a00251.html
 #include <glm/gtc/type_ptr.hpp>         // allows use of glm::value_ptr to get raw pointer to data
 
-#include "character/vector.h"
 #ifndef M_PI
 #define M_PI 3.1415926535
 #endif
