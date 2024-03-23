@@ -89,6 +89,10 @@ namespace Input {
 	}
 	static void register_button_down(SDL_MouseButtonEvent& buttonEvent) noexcept {
 		if (IMGUI_CAPTURE_EVAL) return;
+
+		std::string buttonString = std::to_string(buttonEvent.button);
+    	std::cout << "Button ID: " << buttonString << std::endl;
+
 		Data::get().buttonsPressed.insert(buttonEvent.button);
 		Data::get().buttonsDown.insert(buttonEvent.button);
 	}
