@@ -10,9 +10,13 @@
 
 #include "game_objects/model.hpp"
 
+#include "character/raycastHit.hpp"
+
 struct Enemy : public Model {
     Enemy(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, std::string path, float health)
-        : Model(pos, rot, scale, path), health(health) {}
+        : Model(pos, rot, scale, path), health(health) {
+            sphereCollider.center = pos;    
+        }
 
     void hit(int damage) {
         std::cout << "Enemy hit! (" << damage << "damage)" << std::endl;
@@ -41,6 +45,7 @@ struct Enemy : public Model {
 public:
     float movementSpeed = 2.f;
     float damage = 20.f;
+    Sphere sphereCollider = Sphere(glm::vec3(1,1,1), 1.0f);
 
 private:
     bool playerVisible;

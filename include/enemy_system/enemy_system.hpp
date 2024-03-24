@@ -15,7 +15,8 @@ struct EnemySystem {
 
     void spawnEnemys() {
         for (int i = 0; i < numberOfEnemies; i++) {
-            enemies.insert(enemies.end(), Enemy({2 + (i + 2), 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj", 100.f));
+            Enemy newEnemy = Enemy({2 + (i + 2), 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj", 100.f);
+            enemies.insert(enemies.end(), newEnemy);
         }
     }
 

@@ -14,7 +14,7 @@ struct Player {
 
     void move(float x, float y, float z) {
         position += glm::quat(rotation) * glm::vec3(x,y,z);
-        position.y = 1.8f;
+        position.y = 2.0f;
     }
 
     void takeDamage(int damage) {

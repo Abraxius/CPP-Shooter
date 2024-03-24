@@ -74,7 +74,7 @@ struct RaycastHit
     }
 
     // Ray vs Sphere
-    void isCollision(Ray &ray, Sphere &sphere)
+    bool isCollision(Ray &ray, Sphere &sphere)
     {
         // Ray vs Sphere
         //--------------------------------------------------------------------
@@ -89,10 +89,14 @@ struct RaycastHit
 
             std::cout << "Intersection point: (" << Phit.x << ", " << Phit.y << ", " << Phit.z << ")" << std::endl;
             std::cout << "Normal at intersection: (" << Nhit.x << ", " << Nhit.y << ", " << Nhit.z << ")" << std::endl;
+
+            return true;
         }
         else
         {
             std::cout << "Ray does not intersect the sphere." << std::endl;
+
+            return false;
         }
     }
 };
