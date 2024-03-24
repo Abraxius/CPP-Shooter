@@ -248,11 +248,42 @@ private:
             }
         }
 
+
+
         if (Keys::down('l'))
         {
             enemySystem.spawnEnemys(); 
         }
         // if (Keys::pressed('r')) Mix_PlayChannel(-1, audio.samples[0], 0);
+
+        //Schwerkraft und Springen
+        float jumpHeight = 5.0f; // Maximale Höhe des Sprungs
+        float jumpSpeed = 0.1f;   // Geschwindigkeit des Sprungs
+        float gravity = 0.05f;     // Schwerkraft
+
+        if (Keys::down('x') && onGround) {
+            jumping = true;
+        }
+
+        if (jumping) {
+            player.move(0.0f, jumpSpeed, 0.0f);    
+            if (jumpHeight < player.position.y) {
+                jumping = false;
+            }
+        }
+
+        if (player.position.y > 2) {
+            onGround = false;
+        } else {
+            onGround = true;
+        }
+
+        if (!onGround) {
+            player.move(0.0f, -gravity, 0.0f);        
+        }
+        else {
+            player.position.y = 2;
+        }
 
         player.rotation.x -= player.rotationSpeed * Mouse::delta().second;
         player.rotation.y -= player.rotationSpeed * Mouse::delta().first;
@@ -325,4 +356,7 @@ private:
 
     //  Audio audio;
     EnemySystem enemySystem = EnemySystem(1);
+
+    bool onGround = true;
+    bool jumping = false;
 };
