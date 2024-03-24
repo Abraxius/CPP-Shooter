@@ -230,7 +230,7 @@ private:
         if (Keys::down('r'))
             weapon.reload();
 
-        if (Mouse::down('1') || Keys::down('x'))
+        if (Mouse::down(1))
         {
             Ray ray = raycastHit.getRaycast(window, camera);
 
@@ -304,10 +304,11 @@ private:
         // PointLight({-4, 4, 0}, {0, 0, 0}, {1, 1, 1}, 100.0f),
     };
 
-    std::array<Model, 2> models = {
+    std::array<Model, 3> models = {
         // Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/sponza.obj"),
         Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Ground.obj"),
         Model({2, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Enemy Zombie.obj"),
+        Model({1, 1, 1}, {0, 0, 0}, {0.2f, 0.2f, 0.2f}, "models/weapon/MP5K.obj"),
         // Model({6, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Enemy Zombie with Ground.obj"),
         // Model({4, 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
         // Model({2, 1, 1}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
