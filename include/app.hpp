@@ -45,6 +45,9 @@ struct App
 
     int run()
     {
+        //Spawn Zombies
+        enemySystem.spawnEnemys();
+
         while (bRunning)
         {
             Input::flush(); // flush input from last frame
@@ -262,7 +265,7 @@ private:
 
         if (Keys::down('l'))
         {
-            enemySystem.spawnEnemys();
+            // enemySystem.spawnEnemys();
         }
         // if (Keys::pressed('r')) Mix_PlayChannel(-1, audio.samples[0], 0);
 
@@ -331,7 +334,9 @@ private:
                 glm::vec3 direction = glm::normalize(player.position - enemy.transform.position);
                 float movementSpeed = timer.get_delta() * enemy.movementSpeed;
                 enemy.transform.position += direction * movementSpeed;
+                enemy.transform.position.y = 0.f;
                 enemy.sphereCollider.center = enemy.transform.position;
+                enemy.sphereCollider.center.y = 2.5f;
             }
             // Check if player is hit by enemy
             float distanceToEnemy = glm::distance(player.position, enemy.transform.position);
@@ -340,7 +345,19 @@ private:
             {
                 player.takeDamage(enemy.damage);
             }
+
+            // Check if enemy died
+            if (enemy.died) {
+                player.zombiesKilled++;
+            }
+            
         }
+
+        // Remove dead enemies
+        // enemySystem.enemies.remove_if([](const Enemy& enemy) {
+        //     return enemy.died;
+        // });
+
         // Add Player stamina
         player.increaseStamina(.08f);
     }
@@ -367,7 +384,8 @@ private:
 
     std::array<Model, 2> models = {
         // Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/sponza.obj"),
-        Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Ground.obj"),
+        // Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Ground.obj"),
+        Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/Environment/environment_low.obj"),
         Model({2, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Enemy Zombie.obj"),
         // Model({6, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Enemy Zombie with Ground.obj"),
         // Model({4, 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
@@ -384,7 +402,7 @@ private:
     // Sphere sphereTest = Sphere({1, 1, 1}, 1.0f);
 
     //  Audio audio;
-    EnemySystem enemySystem = EnemySystem(1);
+    EnemySystem enemySystem = EnemySystem(5);
 
     bool onGround = true;
     bool jumping = false;
