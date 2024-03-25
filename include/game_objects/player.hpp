@@ -11,8 +11,8 @@
 #include "character/weapon.hpp"
 #include "character/projectile.hpp"
 struct Player {
-    Player(glm::vec3 position, glm::vec3 rotation, float health, float movementSpeed, float sprintSpeed, float rotationSpeed)
-    : position(position), rotation(glm::radians(rotation)), health(health), movementSpeed(movementSpeed), sprintSpeed(sprintSpeed), rotationSpeed(rotationSpeed) {}
+    Player(glm::vec3 position, glm::vec3 rotation, float health, float stamina, float movementSpeed, float sprintSpeed, float rotationSpeed)
+    : position(position), rotation(glm::radians(rotation)), health(health), stamina(stamina), movementSpeed(movementSpeed), sprintSpeed(sprintSpeed), rotationSpeed(rotationSpeed) {}
 
     void move(float x, float y, float z) {
         glm::vec3 tmpRotation = glm::vec3(0, rotation.y, rotation.z); //ToDo: Warum ist x dafür zuständig, dass man sonst fliegt???
@@ -43,6 +43,7 @@ struct Player {
     
 public:
     float health;
+    float stamina;
 
     float movementSpeed;
     float sprintSpeed;

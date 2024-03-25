@@ -45,6 +45,9 @@ struct App
 
     int run()
     {
+        //Spawn Zombies
+        enemySystem.spawnEnemys();
+
         while (bRunning)
         {
             Input::flush(); // flush input from last frame
@@ -97,6 +100,10 @@ private:
         ImGui::Text("%.1f ms", ImGui::GetIO().DeltaTime * 1000.0f);
         ImGui::End();
 
+        // Crosshair
+        auto draw = ImGui::GetBackgroundDrawList();
+        draw->AddCircle(ImVec2(ImGui::GetIO().DisplaySize.x / 2, ImGui::GetIO().DisplaySize.y / 2), 6 , IM_COL32(0, 0, 255, 255), 100, 2.0f);
+
         // Player stats
         ImVec2 player_window_size = {200, 150};
         ImGui::SetNextWindowPos({ImGui::GetIO().DisplaySize.x - (player_window_size.x + 20), ImGui::GetIO().DisplaySize.y - (player_window_size.y + 20)});
@@ -104,6 +111,7 @@ private:
         ImGui::Begin("Player stats", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
         ImGui::Text("Player");
         ImGui::Text("%.1f HP", player.health);
+        ImGui::Text("%.1f Stamina", player.stamina);
         ImGui::Text("Munition");
         ImGui::Text("%.d / %.d", weapon.bullets, weapon.magazine);
         ImGui::End();
@@ -225,8 +233,10 @@ private:
 
         // player movement
         float movementSpeed = timer.get_delta() * player.movementSpeed;
-        if (Keys::pressed(SDL_KeyCode::SDLK_LSHIFT))
+        if (Keys::down(SDL_KeyCode::SDLK_LSHIFT) && player.stamina > 0.5f) {
             movementSpeed *= player.sprintSpeed; // sprint button
+            player.decreaseStamina(.7f);
+        }
         if (Keys::down('s'))
             player.move(0.0f, 0.0f, movementSpeed);
         if (Keys::down('w'))
@@ -263,7 +273,7 @@ private:
 
         if (Keys::down('l'))
         {
-            enemySystem.spawnEnemys();
+            // enemySystem.spawnEnemys();
         }
         // if (Keys::pressed('r')) Mix_PlayChannel(-1, audio.samples[0], 0);
 
@@ -332,7 +342,9 @@ private:
                 glm::vec3 direction = glm::normalize(player.position - enemy.transform.position);
                 float movementSpeed = timer.get_delta() * enemy.movementSpeed;
                 enemy.transform.position += direction * movementSpeed;
+                enemy.transform.position.y = 0.f;
                 enemy.sphereCollider.center = enemy.transform.position;
+                enemy.sphereCollider.center.y = 2.5f;
             }
             // Check if player is hit by enemy
             float distanceToEnemy = glm::distance(player.position, enemy.transform.position);
@@ -341,15 +353,26 @@ private:
             {
                 player.takeDamage(enemy.damage);
             }
+
+            // Check if enemy died
+            if (enemy.died) {
+                player.zombiesKilled++;
+            }
+            
         }
-        // Add Player stamina
-        player.increaseStamina(.08f);
 
         //Update projectiles
         for (auto &projectiles : weapon.projectilesList) {
             //ToDo: Steuer die Kugel bewegung
         }
 
+        // Remove dead enemies
+        // enemySystem.enemies.remove_if([](const Enemy& enemy) {
+        //     return enemy.died;
+        // });
+
+        // Add Player stamina
+        player.increaseStamina(.08f);
     }
 
 private:
@@ -362,7 +385,7 @@ private:
     Pipeline shadowPipeline = Pipeline("shaders/shadowmapping.vs", "shaders/shadowmapping.fs");
     // Model model = Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/ground/ground.obj");
 
-    Player player = Player({1, 2, 1}, {0, 0, 0}, 100.f, 2.f, 3.f, 0.001f);
+    Player player = Player({1, 2, 1}, {0, 0, 0}, 100.f, 100.f, 2.f, 3.f, 0.001f);
     Camera camera = Camera({1, 2, 1}, {0, 0, 0}, window.width, window.height);
 
     std::array<PointLight, 1> lights = {
@@ -374,7 +397,8 @@ private:
 
     std::array<Model, 2> models = {
         // Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/sponza.obj"),
-        Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Ground.obj"),
+        // Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Ground.obj"),
+        Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/Environment/environment_low.obj"),
         Model({2, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Enemy Zombie.obj"),
         // Model({6, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Enemy Zombie with Ground.obj"),
         // Model({4, 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
@@ -391,7 +415,7 @@ private:
     // Sphere sphereTest = Sphere({1, 1, 1}, 1.0f);
 
     //  Audio audio;
-    EnemySystem enemySystem = EnemySystem(1);
+    EnemySystem enemySystem = EnemySystem(5);
 
     bool onGround = true;
     bool jumping = false;
