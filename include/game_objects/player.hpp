@@ -10,13 +10,20 @@
 
 #include "character/weapon.hpp"
 #include "character/projectile.hpp"
+
+#include "terrain.hpp"
+
 struct Player {
     Player(glm::vec3 position, glm::vec3 rotation, float health, float stamina, float movementSpeed, float sprintSpeed, float rotationSpeed)
     : position(position), rotation(glm::radians(rotation)), health(health), stamina(stamina), movementSpeed(movementSpeed), sprintSpeed(sprintSpeed), rotationSpeed(rotationSpeed) {}
 
     void move(float x, float y, float z) {
         glm::vec3 tmpRotation = glm::vec3(0, rotation.y, rotation.z); //ToDo: Warum ist x dafür zuständig, dass man sonst fliegt???
-        position += glm::quat(tmpRotation) * glm::vec3(x,y,z);
+        glm::vec3 tmpPosition = position + glm::quat(tmpRotation) * glm::vec3(x,y,z);
+
+        if (map.checkIsInArea(tmpPosition)) {
+            position = tmpPosition;
+        }
     }
 
     void takeDamage(int damage) {
@@ -54,4 +61,5 @@ public:
     glm::vec3 position;
     glm::vec3 rotation; // euler rotation
     
+    Terrain map = Terrain(20,20);
 };

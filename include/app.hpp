@@ -156,6 +156,10 @@ private:
                 // draw Enemys
                 for (auto &enemy : enemySystem.enemies)
                     enemy.draw();
+
+                for (auto &wall : player.map.walls)
+                    wall.draw();
+
                 // draw other light models
                 for (size_t i = 0; i < lights.size(); i++)
                 {
@@ -190,6 +194,9 @@ private:
 
         for (auto &enemy : enemySystem.enemies)
             enemy.draw();
+
+        for (auto &wall : player.map.walls)
+            wall.draw();
     }
 
     std::pair<float, float> getMousePosition()
@@ -238,6 +245,7 @@ private:
             movementSpeed *= player.sprintSpeed; // sprint button
             player.decreaseStamina(.7f);
         }
+
         if (Keys::down('s'))
             player.move(0.0f, 0.0f, movementSpeed);
         if (Keys::down('w'))
@@ -410,8 +418,10 @@ private:
     std::array<Model, 2> models = {
         // Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/sponza.obj"),
         // Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Ground.obj"),
+        
         Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/Environment/environment_low.obj"),
         Model({2, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Enemy Zombie.obj"),
+
         // Model({6, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Enemy Zombie with Ground.obj"),
         // Model({4, 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
         // Model({2, 1, 1}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
@@ -420,14 +430,8 @@ private:
     Weapon weapon;
     RaycastHit raycastHit;
 
-    // ToDo: Die einzelne Sphere durch ein Array oder Liste ersetzen
-
-    // std::list<Sphere> sphereColliders = {};
-
-    // Sphere sphereTest = Sphere({1, 1, 1}, 1.0f);
-
     //  Audio audio;
-    EnemySystem enemySystem = EnemySystem(3);
+    EnemySystem enemySystem = EnemySystem(1);
 
     bool onGround = true;
     bool jumping = false;
