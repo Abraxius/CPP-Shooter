@@ -20,8 +20,6 @@ using namespace gl;
 #include "timer.hpp"
 // #include "audio.hpp"
 
-
-
 #include "game_objects/model.hpp"
 #include "game_objects/lights/light_point.hpp"
 #include "game_objects/camera.hpp"
@@ -141,6 +139,9 @@ private:
                 // draw models
                 for (auto &model : models)
                     model.draw();
+
+                weaponModel.draw();
+
                 // draw Enemys
                 for (auto &enemy : enemySystem.enemies)
                     enemy.draw();
@@ -170,6 +171,8 @@ private:
             light.draw();
         for (auto &model : models)
             model.draw();
+
+        weaponModel.draw();
 
         for (auto &enemy : enemySystem.enemies)
             enemy.draw();
@@ -230,15 +233,19 @@ private:
         if (Keys::down('r'))
             weapon.reload();
 
+
+        
         if (Mouse::down(1))
         {
             Ray ray = raycastHit.getRaycast(window, camera);
 
             if (weapon.fire())
             {
-                for (auto &enemie : enemySystem.enemies) {
-                    if (raycastHit.isCollision(ray, enemie.sphereCollider)) {
-                       enemie.hit(50.0f); 
+                for (auto &enemie : enemySystem.enemies)
+                {
+                    if (raycastHit.isCollision(ray, enemie.sphereCollider))
+                    {
+                        enemie.hit(50.0f);
                     }
                 }
             }
@@ -248,40 +255,46 @@ private:
             }
         }
 
-
-
         if (Keys::down('l'))
         {
-            enemySystem.spawnEnemys(); 
+            enemySystem.spawnEnemys();
         }
         // if (Keys::pressed('r')) Mix_PlayChannel(-1, audio.samples[0], 0);
 
-        //Schwerkraft und Springen
+        // Schwerkraft und Springen
         float jumpHeight = 5.0f; // Maximale Höhe des Sprungs
-        float jumpSpeed = 0.1f;   // Geschwindigkeit des Sprungs
-        float gravity = 0.05f;     // Schwerkraft
+        float jumpSpeed = 0.1f;  // Geschwindigkeit des Sprungs
+        float gravity = 0.05f;   // Schwerkraft
 
-        if (Keys::down('x') && onGround) {
+        if (Keys::down('x') && onGround)
+        {
             jumping = true;
         }
 
-        if (jumping) {
-            player.move(0.0f, jumpSpeed, 0.0f);    
-            if (jumpHeight < player.position.y) {
+        if (jumping)
+        {
+            player.move(0.0f, jumpSpeed, 0.0f);
+            if (jumpHeight < player.position.y)
+            {
                 jumping = false;
             }
         }
 
-        if (player.position.y > 2) {
+        if (player.position.y > 2)
+        {
             onGround = false;
-        } else {
+        }
+        else
+        {
             onGround = true;
         }
 
-        if (!onGround) {
-            player.move(0.0f, -gravity, 0.0f);        
+        if (!onGround)
+        {
+            player.move(0.0f, -gravity, 0.0f);
         }
-        else {
+        else
+        {
             player.position.y = 2;
         }
 
@@ -291,6 +304,14 @@ private:
         // Sync Camera and Player
         camera.position = player.position;
         camera.rotation = player.rotation;
+
+        // Berechnen der neuen Position der Waffe basierend auf der Kamerarotation und der Offset-Position
+        glm::vec3 weaponPosition = camera.position + (glm::quat(camera.rotation) * glm::vec3(0.25f, -0.5f, -1.0f));
+
+        float pi = 3.14159265358979323846f;
+
+        weaponModel.transform.position = weaponPosition;
+        weaponModel.transform.rotation = glm::vec3(camera.rotation.y + pi,-camera.rotation.x,camera.rotation.z); //ToDo: Ich hab keine Ahnung warum diese Mathe funktioniert??? WTF???? Später nochmal anschauen!!!
     }
 
     void updateGame()
@@ -300,8 +321,8 @@ private:
             // Check if player is seen by enemy
             if (enemy.isPlayerInSight(player.position))
             {
-                //std::cout << "Spieler wurde vom Zombie gesehen!" << std::endl;
-                // Move Enemy towards Player
+                // std::cout << "Spieler wurde vom Zombie gesehen!" << std::endl;
+                //  Move Enemy towards Player
                 glm::vec3 direction = glm::normalize(player.position - enemy.transform.position);
                 float movementSpeed = timer.get_delta() * enemy.movementSpeed;
                 enemy.transform.position += direction * movementSpeed;
@@ -335,11 +356,12 @@ private:
         // PointLight({-4, 4, 0}, {0, 0, 0}, {1, 1, 1}, 100.0f),
     };
 
-    std::array<Model, 3> models = {
+    Model weaponModel = Model({1, 1, 1}, {0, 0, 0}, {0.2f, 0.2f, 0.2f}, "models/weapon/M4a1.obj");
+
+    std::array<Model, 2> models = {
         // Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/sponza.obj"),
         Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Ground.obj"),
         Model({2, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Enemy Zombie.obj"),
-        Model({1, 1, 1}, {0, 0, 0}, {0.2f, 0.2f, 0.2f}, "models/weapon/MP5K.obj"),
         // Model({6, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Enemy Zombie with Ground.obj"),
         // Model({4, 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
         // Model({2, 1, 1}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
@@ -350,9 +372,9 @@ private:
 
     // ToDo: Die einzelne Sphere durch ein Array oder Liste ersetzen
 
-   // std::list<Sphere> sphereColliders = {};
+    // std::list<Sphere> sphereColliders = {};
 
-    //Sphere sphereTest = Sphere({1, 1, 1}, 1.0f);
+    // Sphere sphereTest = Sphere({1, 1, 1}, 1.0f);
 
     //  Audio audio;
     EnemySystem enemySystem = EnemySystem(1);
