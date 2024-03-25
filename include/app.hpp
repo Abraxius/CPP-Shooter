@@ -97,6 +97,10 @@ private:
         ImGui::Text("%.1f ms", ImGui::GetIO().DeltaTime * 1000.0f);
         ImGui::End();
 
+        // Crosshair
+        auto draw = ImGui::GetBackgroundDrawList();
+        draw->AddCircle(ImVec2(ImGui::GetIO().DisplaySize.x / 2, ImGui::GetIO().DisplaySize.y / 2), 6 , IM_COL32(0, 0, 255, 255), 100, 2.0f);
+
         // Player stats
         ImVec2 player_window_size = {200, 150};
         ImGui::SetNextWindowPos({ImGui::GetIO().DisplaySize.x - (player_window_size.x + 20), ImGui::GetIO().DisplaySize.y - (player_window_size.y + 20)});
