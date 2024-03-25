@@ -9,8 +9,8 @@
 #include <glm/gtc/type_ptr.hpp> // allows use of glm::value_ptr to get raw pointer to data
 
 struct Player {
-    Player(glm::vec3 position, glm::vec3 rotation, float health, float movementSpeed, float sprintSpeed, float rotationSpeed)
-    : position(position), rotation(glm::radians(rotation)), health(health), movementSpeed(movementSpeed), sprintSpeed(sprintSpeed), rotationSpeed(rotationSpeed) {}
+    Player(glm::vec3 position, glm::vec3 rotation, float health, float stamina, float movementSpeed, float sprintSpeed, float rotationSpeed)
+    : position(position), rotation(glm::radians(rotation)), health(health), stamina(stamina), movementSpeed(movementSpeed), sprintSpeed(sprintSpeed), rotationSpeed(rotationSpeed) {}
 
     void move(float x, float y, float z) {
         glm::vec3 tmpRotation = glm::vec3(0, rotation.y, rotation.z); //ToDo: Warum ist x dafür zuständig, dass man sonst fliegt???
@@ -27,8 +27,21 @@ struct Player {
         std::cout << "Player died!" << std::endl;
     }
 
+    void increaseStamina(float value) {
+        float newStamina = stamina + value;
+        if (newStamina > 100) stamina = 100;
+        else stamina = newStamina;
+    }
+
+    void decreaseStamina(float value) {
+        float newStamina = stamina - value;
+        if (newStamina < 0) stamina = 0;
+        else stamina = newStamina;
+    }
+
 public:
     float health;
+    float stamina;
 
     float movementSpeed;
     float sprintSpeed;

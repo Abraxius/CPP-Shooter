@@ -104,6 +104,7 @@ private:
         ImGui::Begin("Player stats", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
         ImGui::Text("Player");
         ImGui::Text("%.1f HP", player.health);
+        ImGui::Text("%.1f Stamina", player.stamina);
         ImGui::Text("Munition");
         ImGui::Text("%.d / %.d", weapon.bullets, weapon.magazine);
         ImGui::End();
@@ -219,8 +220,10 @@ private:
 
         // player movement
         float movementSpeed = timer.get_delta() * player.movementSpeed;
-        if (Keys::down(SDL_KeyCode::SDLK_LSHIFT))
+        if (Keys::down(SDL_KeyCode::SDLK_LSHIFT) && player.stamina > 0.5f) {
             movementSpeed *= player.sprintSpeed; // sprint button
+            player.decreaseStamina(.7f);
+        }
         if (Keys::down('s'))
             player.move(0.0f, 0.0f, movementSpeed);
         if (Keys::down('w'))
@@ -334,6 +337,8 @@ private:
                 player.takeDamage(enemy.damage);
             }
         }
+        // Add Player stamina
+        player.increaseStamina(.08f);
     }
 
 private:
@@ -346,7 +351,7 @@ private:
     Pipeline shadowPipeline = Pipeline("shaders/shadowmapping.vs", "shaders/shadowmapping.fs");
     // Model model = Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/ground/ground.obj");
 
-    Player player = Player({1, 2, 1}, {0, 0, 0}, 100.f, 2.f, 3.f, 0.001f);
+    Player player = Player({1, 2, 1}, {0, 0, 0}, 100.f, 100.f, 2.f, 3.f, 0.001f);
     Camera camera = Camera({1, 2, 1}, {0, 0, 0}, window.width, window.height);
 
     std::array<PointLight, 1> lights = {
