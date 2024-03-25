@@ -27,11 +27,13 @@ struct Weapon
     // ToDo: Für später
     // void aim() {}
 
-    void shootProjectile(glm::vec3 playerPos)
+    void shootProjectile(glm::vec3 playerPos, glm::vec3 playerRot)
     {
             // The projectile will move from the start position in the direction of directionNormal.
             // Add the projectile to the list.
-            Projectile newProjectile = Projectile(playerPos, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj");
+
+            glm::vec3 spawnPosition = playerPos += glm::quat(playerRot) * glm::vec3(0,0,-1.5f);
+            Projectile newProjectile = Projectile(playerPos, playerRot, {0.2, 0.2, 0.2}, "models/test/cube.obj");
             projectilesList.push_back(newProjectile);
 
             // Play sound.
@@ -54,9 +56,10 @@ struct Weapon
             //cooldownTimer.resetToMax();
     }
 
-    void updateShoots() {
-        
+    void deleteProjectile(Projectile projectile) {
+        //ToDo: Zerstöre das Projektil
     }
+
     bool fire() // ToDo: für später glm::vec3& direction,glm::vec3& startpoint,glm::vec3& camdirection
     {
         if (isReloading)

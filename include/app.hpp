@@ -45,7 +45,7 @@ struct App
 
     int run()
     {
-        //Spawn Zombies
+        // Spawn Zombies
         enemySystem.spawnEnemys();
 
         while (bRunning)
@@ -102,7 +102,7 @@ private:
 
         // Crosshair
         auto draw = ImGui::GetBackgroundDrawList();
-        draw->AddCircle(ImVec2(ImGui::GetIO().DisplaySize.x / 2, ImGui::GetIO().DisplaySize.y / 2), 6 , IM_COL32(0, 0, 255, 255), 100, 2.0f);
+        draw->AddCircle(ImVec2(ImGui::GetIO().DisplaySize.x / 2, ImGui::GetIO().DisplaySize.y / 2), 6, IM_COL32(0, 0, 255, 255), 100, 2.0f);
 
         // Player stats
         ImVec2 player_window_size = {200, 150};
@@ -233,7 +233,8 @@ private:
 
         // player movement
         float movementSpeed = timer.get_delta() * player.movementSpeed;
-        if (Keys::down(SDL_KeyCode::SDLK_LSHIFT) && player.stamina > 0.5f) {
+        if (Keys::down(SDL_KeyCode::SDLK_LSHIFT) && player.stamina > 0.5f)
+        {
             movementSpeed *= player.sprintSpeed; // sprint button
             player.decreaseStamina(.7f);
         }
@@ -255,7 +256,7 @@ private:
 
             if (weapon.fire())
             {
-                weapon.shootProjectile(player.position);
+                weapon.shootProjectile(player.position, player.rotation);
 
                 for (auto &enemie : enemySystem.enemies)
                 {
@@ -327,7 +328,7 @@ private:
         float pi = 3.14159265358979323846f;
 
         weaponModel.transform.position = weaponPosition;
-        weaponModel.transform.rotation = glm::vec3(camera.rotation.y + pi,-camera.rotation.x,camera.rotation.z); //ToDo: Ich hab keine Ahnung warum diese Mathe funktioniert??? WTF???? Später nochmal anschauen!!!
+        weaponModel.transform.rotation = glm::vec3(camera.rotation.y + pi, -camera.rotation.x, camera.rotation.z); // ToDo: Ich hab keine Ahnung warum diese Mathe funktioniert??? WTF???? Später nochmal anschauen!!!
     }
 
     void updateGame()
@@ -355,15 +356,26 @@ private:
             }
 
             // Check if enemy died
-            if (enemy.died) {
+            if (enemy.died)
+            {
                 player.zombiesKilled++;
             }
-            
         }
 
-        //Update projectiles
-        for (auto &projectiles : weapon.projectilesList) {
-            //ToDo: Steuer die Kugel bewegung
+        // Update projectiles
+        for (auto &projectiles : weapon.projectilesList)
+        {
+            // ToDo: Steuer die Kugel bewegung
+            float movementSpeed = timer.get_delta() * projectiles.movementSpeed;
+            projectiles.move(0.0f, 0.0f, -movementSpeed);
+
+            if (projectiles.maxFlyDistanceAchieved()) {
+                //std::cout << "Kugel hat ihr Ziel erreicht" << std::endl;
+                weapon.deleteProjectile(projectiles);
+            }
+            else {
+                //std::cout << "Kugel flieeeeeeeeg" << std::endl;
+            }
         }
 
         // Remove dead enemies
@@ -415,7 +427,7 @@ private:
     // Sphere sphereTest = Sphere({1, 1, 1}, 1.0f);
 
     //  Audio audio;
-    EnemySystem enemySystem = EnemySystem(5);
+    EnemySystem enemySystem = EnemySystem(3);
 
     bool onGround = true;
     bool jumping = false;
