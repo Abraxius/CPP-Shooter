@@ -219,7 +219,7 @@ private:
 
         // player movement
         float movementSpeed = timer.get_delta() * player.movementSpeed;
-        if (Keys::pressed(SDL_KeyCode::SDLK_LSHIFT))
+        if (Keys::down(SDL_KeyCode::SDLK_LSHIFT))
             movementSpeed *= player.sprintSpeed; // sprint button
         if (Keys::down('s'))
             player.move(0.0f, 0.0f, movementSpeed);
