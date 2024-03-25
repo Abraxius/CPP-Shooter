@@ -13,8 +13,8 @@ struct Player {
     : position(position), rotation(glm::radians(rotation)), health(health), movementSpeed(movementSpeed), sprintSpeed(sprintSpeed), rotationSpeed(rotationSpeed) {}
 
     void move(float x, float y, float z) {
-        position += glm::quat(rotation) * glm::vec3(x,y,z);
-        //position.y = 2.0f;
+        glm::vec3 tmpRotation = glm::vec3(0, rotation.y, rotation.z); //ToDo: Warum ist x dafür zuständig, dass man sonst fliegt???
+        position += glm::quat(tmpRotation) * glm::vec3(x,y,z);
     }
 
     void takeDamage(int damage) {

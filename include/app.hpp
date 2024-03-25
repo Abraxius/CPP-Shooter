@@ -233,8 +233,6 @@ private:
         if (Keys::down('r'))
             weapon.reload();
 
-
-        
         if (Mouse::down(1))
         {
             Ray ray = raycastHit.getRaycast(window, camera);
@@ -266,7 +264,7 @@ private:
         float jumpSpeed = 0.1f;  // Geschwindigkeit des Sprungs
         float gravity = 0.05f;   // Schwerkraft
 
-        if (Keys::down('x') && onGround)
+        if (Keys::down(32) && onGround)
         {
             jumping = true;
         }
