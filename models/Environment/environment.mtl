@@ -1,0 +1,43 @@
+# Blender 4.0.1 MTL File: 'environment.blend'
+# www.blender.org
+
+newmtl Material.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 9
+map_Kd textures/Grass 2K.png
+map_Ns textures/Grass_Roughness.png
+map_d textures/Grass_Opacity.png
+
+newmtl ground
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd textures/aerial_grass_rock_diff_2k.jpg
+map_Ns textures/aerial_grass_rock_rough_2k.jpg
+map_Bump -bm 1.000000 textures/aerial_grass_rock_nor_gl_2k.exr
+
+newmtl m_grass_s.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/Grass_m_grass_s_BaseColor.png
+map_Ns textures/Grass_m_grass_s_Roughness.png
+map_d textures/Grass_m_grass_s_BaseColor.png
+
+newmtl m_grass_t.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 2
+map_Kd textures/Grass_m_grass_t_BaseColor.png
+map_Ns textures/Grass_m_grass_t_Roughness.png
+map_d textures/Grass_m_grass_t_BaseColor.png
