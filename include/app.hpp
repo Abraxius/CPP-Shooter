@@ -140,6 +140,9 @@ private:
                 for (auto &model : models)
                     model.draw();
 
+                for (auto &projectiles : weapon.projectilesList)
+                    projectiles.draw();
+
                 weaponModel.draw();
 
                 // draw Enemys
@@ -171,6 +174,9 @@ private:
             light.draw();
         for (auto &model : models)
             model.draw();
+
+        for (auto &projectiles : weapon.projectilesList)
+            projectiles.draw();
 
         weaponModel.draw();
 
@@ -239,6 +245,8 @@ private:
 
             if (weapon.fire())
             {
+                weapon.shootProjectile(player.position);
+
                 for (auto &enemie : enemySystem.enemies)
                 {
                     if (raycastHit.isCollision(ray, enemie.sphereCollider))
@@ -334,6 +342,14 @@ private:
                 player.takeDamage(enemy.damage);
             }
         }
+        // Add Player stamina
+        player.increaseStamina(.08f);
+
+        //Update projectiles
+        for (auto &projectiles : weapon.projectilesList) {
+            //ToDo: Steuer die Kugel bewegung
+        }
+
     }
 
 private:

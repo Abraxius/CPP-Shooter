@@ -8,6 +8,8 @@
 #include <glm/gtx/euler_angles.hpp> // https://glm.g-truc.net/0.9.1/api/a00251.html
 #include <glm/gtc/type_ptr.hpp> // allows use of glm::value_ptr to get raw pointer to data
 
+#include "character/weapon.hpp"
+#include "character/projectile.hpp"
 struct Player {
     Player(glm::vec3 position, glm::vec3 rotation, float health, float movementSpeed, float sprintSpeed, float rotationSpeed)
     : position(position), rotation(glm::radians(rotation)), health(health), movementSpeed(movementSpeed), sprintSpeed(sprintSpeed), rotationSpeed(rotationSpeed) {}
@@ -27,6 +29,18 @@ struct Player {
         std::cout << "Player died!" << std::endl;
     }
 
+    void increaseStamina(float value) {
+        float newStamina = stamina + value;
+        if (newStamina > 100) stamina = 100;
+        else stamina = newStamina;
+    }
+
+    void decreaseStamina(float value) {
+        float newStamina = stamina - value;
+        if (newStamina < 0) stamina = 0;
+        else stamina = newStamina;
+    }
+    
 public:
     float health;
 

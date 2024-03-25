@@ -1,5 +1,7 @@
 #pragma once
 
+#include "character/projectile.hpp"
+
 struct Weapon
 {
     bool isReloading = false;
@@ -15,6 +17,8 @@ struct Weapon
 
     unsigned int currentReloadTime = 0;
     unsigned int reloadTime = 300;
+
+    std::list<Projectile> projectilesList;
     // ToDo: für später
     // float precision;
     // float aimPrecision;
@@ -23,6 +27,36 @@ struct Weapon
     // ToDo: Für später
     // void aim() {}
 
+    void shootProjectile(glm::vec3 playerPos)
+    {
+            // The projectile will move from the start position in the direction of directionNormal.
+            // Add the projectile to the list.
+            Projectile newProjectile = Projectile(playerPos, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj");
+            projectilesList.push_back(newProjectile);
+
+            // Play sound.
+            /*if (mix_ChunkWeaponShoot != nullptr)
+            {
+                int channelSelected = Mix_PlayChannel(-1, mix_ChunkWeaponShoot, 0);
+                // If it wasn't shot from the player then adjust it's volume based on it's position and angle relative to the player.
+                if (setShotFromPlayer == false && channelSelected > -1)
+                {
+                    float fDistanceSound = sqrt(distanceSound / 50.0f);
+                    if (fDistanceSound < 0.0f)
+                        fDistanceSound = 0.0f;
+                    if (fDistanceSound > 0.7f)
+                        fDistanceSound = 0.7f;
+
+                    Mix_SetPosition(channelSelected, (int)angleSoundDeg, (int)(fDistanceSound * 255));
+                }
+            }*/
+
+            //cooldownTimer.resetToMax();
+    }
+
+    void updateShoots() {
+        
+    }
     bool fire() // ToDo: für später glm::vec3& direction,glm::vec3& startpoint,glm::vec3& camdirection
     {
         if (isReloading)
@@ -98,12 +132,16 @@ struct Weapon
     {
         if (!isReloading)
             lastShot++;
-        else {
-            if (currentReloadTime >= reloadTime) {
+        else
+        {
+            if (currentReloadTime >= reloadTime)
+            {
                 currentReloadTime = 0;
                 std::cout << "Nachgeladen: " << bullets << std::endl;
                 isReloading = false;
-            } else {
+            }
+            else
+            {
                 currentReloadTime++;
             }
         }
