@@ -403,35 +403,25 @@ private:
     // render resources
     Pipeline colorPipeline = Pipeline("shaders/default.vs", "shaders/default.fs");
     Pipeline shadowPipeline = Pipeline("shaders/shadowmapping.vs", "shaders/shadowmapping.fs");
-    // Model model = Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/ground/ground.obj");
 
     Player player = Player({1, 2, 1}, {0, 0, 0}, 100.f, 100.f, 2.f, 3.f, 0.001f);
     Camera camera = Camera({1, 2, 1}, {0, 0, 0}, window.width, window.height);
 
     std::array<PointLight, 1> lights = {
         PointLight({10, 20, 0}, {0, 0, 0}, {1, 1, 1}, 100.0f),
-        // PointLight({-4, 4, 0}, {0, 0, 0}, {1, 1, 1}, 100.0f),
     };
 
     Model weaponModel = Model({1, 1, 1}, {0, 0, 0}, {0.2f, 0.2f, 0.2f}, "models/weapon/M4a1.obj");
 
-    std::array<Model, 2> models = {
-        // Model({0, 0, 0}, {0, 0, 0}, {.01, .01, .01}, "models/sponza/sponza.obj"),
-        // Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Ground.obj"),
-        
+    std::array<Model, 1> models = {        
         Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/Environment/environment_low.obj"),
-        Model({2, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Enemy Zombie.obj"),
-
-        // Model({6, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Enemy Zombie with Ground.obj"),
-        // Model({4, 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
-        // Model({2, 1, 1}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj"),
     };
 
     Weapon weapon;
     RaycastHit raycastHit;
 
     //  Audio audio;
-    EnemySystem enemySystem = EnemySystem(1);
+    EnemySystem enemySystem = EnemySystem(10);
 
     bool onGround = true;
     bool jumping = false;

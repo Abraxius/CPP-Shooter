@@ -61,5 +61,5 @@ public:
     glm::vec3 position;
     glm::vec3 rotation; // euler rotation
     
-    Terrain map = Terrain(20,20);
+    Terrain map = Terrain(100,100);
 };
