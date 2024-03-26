@@ -41,13 +41,14 @@ struct App
         // attach texture to frame buffer (only draw to depth, no color output!)
         glNamedFramebufferReadBuffer(shadowPipeline.framebuffer, GL_NONE);
         glNamedFramebufferDrawBuffer(shadowPipeline.framebuffer, GL_NONE);
+
+        // Spawn Zombies
+        enemySystem.spawnEnemys();
+        std::cout << "All models loaded!" << std::endl;
     }
 
     int run()
     {
-        // Spawn Zombies
-        enemySystem.spawnEnemys();
-
         while (bRunning)
         {
             Input::flush(); // flush input from last frame

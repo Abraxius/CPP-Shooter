@@ -9,6 +9,8 @@ extern "C" {
 #endif
 
 int main() {
+    std::cout << "Start" << std::endl;
     App app;
+    std::cout << "App built" << std::endl;
     return app.run();
 }
