@@ -33,6 +33,10 @@ using namespace gl;
 #include "character/raycastHit.hpp"
 #include <list>
 
+unsigned int skyboxVAO, skyboxVBO;
+unsigned int cubeVAO, cubeVBO;
+unsigned int cubemapTexture;
+
 struct App
 {
     App()
@@ -44,12 +48,125 @@ struct App
         glNamedFramebufferDrawBuffer(shadowPipeline.framebuffer, GL_NONE);
 
 
-        skyboxPipeline.bind();
+        // skyboxPipeline.bind();
 
         // Spawn Zombies
         enemySystem.spawnEnemys();
         std::cout << "All models loaded!" << std::endl;
+
+        float skyboxVertices[24] =
+        {
+            //   Coordinates
+            -1.0f, -1.0f,  1.0f,//        7--------6
+            1.0f, -1.0f,  1.0f,//       /|       /|
+            1.0f, -1.0f, -1.0f,//      4--------5 |
+            -1.0f, -1.0f, -1.0f,//      | |      | |
+            -1.0f,  1.0f,  1.0f,//      | 3------|-2
+            1.0f,  1.0f,  1.0f,//      |/       |/
+            1.0f,  1.0f, -1.0f,//      0--------1
+            -1.0f,  1.0f, -1.0f
+        };
+
+        int skyboxIndices[36] =
+        {
+            // Right
+            1, 2, 6,
+            6, 5, 1,
+            // Left
+            0, 4, 7,
+            7, 3, 0,
+            // Top
+            4, 5, 6,
+            6, 7, 4,
+            // Bottom
+            0, 3, 2,
+            2, 1, 0,
+            // Back
+            0, 1, 5,
+            5, 4, 0,
+            // Front
+            3, 7, 6,
+            6, 2, 3
+        };
+
+        // skybox VAO
+        glGenVertexArrays(1, &skyboxVAO);
+        glGenBuffers(1, &skyboxVBO);
+        glBindVertexArray(skyboxVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+        // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skyboxIndices), &skyboxIndices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+        // vector<std::string> faces
+        // {
+        //     FileSystem::getPath("skybox/px.png"),
+        //     FileSystem::getPath("skybox/nx.png"),
+        //     FileSystem::getPath("skybox/py.png"),
+        //     FileSystem::getPath("skybox/ny.png"),
+        //     FileSystem::getPath("skybox/pz.png"),
+        //     FileSystem::getPath("skybox/nz.png")
+        // };
+        std::string parentDir = (fs::current_path().fs::path::parent_path()).string();
+
+        std::string faces[6] =
+        {
+            parentDir + "/skybox/px.png",
+            parentDir + "/skybox/nx.png",
+            parentDir + "/skybox/py.png",
+            parentDir + "/skybox/ny.png",
+            parentDir + "/skybox/pz.png",
+            parentDir + "/skybox/nz.png"
+        };
+
+        cubemapTexture = loadCubemap(faces);
+
+        skyboxPipeline.bind();
     }
+
+    unsigned int loadCubemap(std::string faces[])
+    {
+        unsigned int textureID;
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+        int width, height, nrChannels;
+        for (unsigned int i = 0; i < 6; i++)
+        {
+            int width, height, nrChannels;
+            unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+            if (data)
+            {
+                stbi_set_flip_vertically_on_load(false);
+                glTexImage2D
+                (
+                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                    0,
+                    GL_RGB,
+                    width,
+                    height,
+                    0,
+                    GL_RGB,
+                    GL_UNSIGNED_BYTE,
+                    data
+                );
+                stbi_image_free(data);
+            }
+            else
+            {
+                std::cout << "Failed to load texture: " << faces[i] << std::endl;
+                stbi_image_free(data);
+            }
+        }
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+        return textureID;
+    } 
 
     int run()
     {
@@ -181,16 +298,30 @@ private:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //
-        glBindFramebuffer(GL_FRAMEBUFFER, skyboxPipeline.framebuffer);
-        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        skyboxPipeline.bind();
-        // set framebuffer texture and clear it
-        skybox.bind();
+        // glBindFramebuffer(GL_FRAMEBUFFER, skyboxPipeline.framebuffer);
+        // // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // skyboxPipeline.bind();
+        // // set framebuffer texture and clear it
+        // skybox.bind();
         // glUniform1i(glGetUniformLocation(2, "skybox"), 0);
 
         colorPipeline.bind();
         // bind resources to pipeline
         camera.bind();
+
+        skyboxPipeline.bind();
+                // draw skybox as last
+        glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+        skyboxPipeline.bind();
+        // skybox cube
+        glBindVertexArray(skyboxVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(0);
+        glDepthFunc(GL_LESS); // set depth function back to default
+
+
         for (size_t iLight = 0; iLight < lights.size(); iLight++)
         {
             lights[iLight].bind_read(iLight, iLight + 1);
@@ -422,7 +553,7 @@ private:
     Pipeline colorPipeline = Pipeline("shaders/default.vs", "shaders/default.fs");
     Pipeline shadowPipeline = Pipeline("shaders/shadowmapping.vs", "shaders/shadowmapping.fs");
     Pipeline skyboxPipeline = Pipeline("shaders/skybox.vs", "shaders/skybox.fs");
-    Skybox skybox = Skybox();
+    // Skybox skybox = Skybox();
 
     Player player = Player({1, 2, 1}, {0, 0, 0}, 100.f, 100.f, 2.f, 3.f, 0.001f);
     Camera camera = Camera({1, 2, 1}, {0, 0, 0}, window.width, window.height);
