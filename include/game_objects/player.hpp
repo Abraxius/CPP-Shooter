@@ -36,6 +36,13 @@ struct Player {
         std::cout << "Player died!" << std::endl;
     }
 
+    bool isAlive() {
+        if(health <= 0) 
+            return false;
+        else 
+            return true;
+    }
+
     void increaseStamina(float value) {
         float newStamina = stamina + value;
         if (newStamina > 100) stamina = 100;
@@ -61,5 +68,5 @@ public:
     glm::vec3 position;
     glm::vec3 rotation; // euler rotation
     
-    Terrain map = Terrain(100,100);
+    Terrain map = Terrain(40,40);
 };
