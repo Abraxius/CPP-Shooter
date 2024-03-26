@@ -23,6 +23,7 @@ using namespace gl;
 #include "game_objects/model.hpp"
 #include "game_objects/lights/light_point.hpp"
 #include "game_objects/camera.hpp"
+#include "game_objects/skybox.hpp"
 
 #include "enemy_system/enemy_system.hpp"
 #include "game_objects/player.hpp"
@@ -41,6 +42,9 @@ struct App
         // attach texture to frame buffer (only draw to depth, no color output!)
         glNamedFramebufferReadBuffer(shadowPipeline.framebuffer, GL_NONE);
         glNamedFramebufferDrawBuffer(shadowPipeline.framebuffer, GL_NONE);
+
+
+        skyboxPipeline.bind();
 
         // Spawn Zombies
         enemySystem.spawnEnemys();
@@ -175,6 +179,15 @@ private:
         glViewport(0, 0, window.width, window.height);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        //
+        glBindFramebuffer(GL_FRAMEBUFFER, skyboxPipeline.framebuffer);
+        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        skyboxPipeline.bind();
+        // set framebuffer texture and clear it
+        skybox.bind();
+        // glUniform1i(glGetUniformLocation(2, "skybox"), 0);
+
         colorPipeline.bind();
         // bind resources to pipeline
         camera.bind();
@@ -408,6 +421,8 @@ private:
     // render resources
     Pipeline colorPipeline = Pipeline("shaders/default.vs", "shaders/default.fs");
     Pipeline shadowPipeline = Pipeline("shaders/shadowmapping.vs", "shaders/shadowmapping.fs");
+    Pipeline skyboxPipeline = Pipeline("shaders/skybox.vs", "shaders/skybox.fs");
+    Skybox skybox = Skybox();
 
     Player player = Player({1, 2, 1}, {0, 0, 0}, 100.f, 100.f, 2.f, 3.f, 0.001f);
     Camera camera = Camera({1, 2, 1}, {0, 0, 0}, window.width, window.height);
@@ -419,7 +434,7 @@ private:
     Model weaponModel = Model({1, 1, 1}, {0, 0, 0}, {0.2f, 0.2f, 0.2f}, "models/weapon/M4a1.obj");
 
     std::array<Model, 1> models = {        
-        Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/Environment/environment_low.obj"),
+        Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/Environment/environment_low3.obj"),
     };
 
     Weapon weapon;
