@@ -17,7 +17,7 @@ struct EnemySystem {
 
     void spawnEnemys() {
         for (int i = 0; i < numberOfEnemies; i++) {
-            std::pair<int, int> cords = generateUniqueRandomCoordinate(-50, 50, -50, 50);
+            std::pair<int, int> cords = generateUniqueRandomCoordinate(-5, 5, -5, 5);
             // Enemy newEnemy = Enemy({2 + (i + 2), 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj", 100.f);
             Enemy newEnemy = Enemy({cords.first, 0, cords.second}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Enemy Zombie.obj", 100.f);
             enemies.insert(enemies.end(), newEnemy);

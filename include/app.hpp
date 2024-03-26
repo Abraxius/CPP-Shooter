@@ -350,6 +350,8 @@ private:
                 // std::cout << "Spieler wurde vom Zombie gesehen!" << std::endl;
                 //  Move Enemy towards Player
                 glm::vec3 direction = glm::normalize(player.position - enemy.transform.position);
+                enemy.rotateTowards(player.position);
+
                 float movementSpeed = timer.get_delta() * enemy.movementSpeed;
                 enemy.transform.position += direction * movementSpeed;
                 enemy.transform.position.y = 0.f;
@@ -358,9 +360,11 @@ private:
             }
             // Check if player is hit by enemy
             float distanceToEnemy = glm::distance(player.position, enemy.transform.position);
-            float collisionRadius = 2.0f;
+            // std::cout << distanceToEnemy << std::endl;
+            float collisionRadius = 2.5f;
             if (distanceToEnemy <= collisionRadius)
             {
+                // std::cout << "sadasd" << std::endl;
                 player.takeDamage(enemy.damage);
             }
 
@@ -422,7 +426,7 @@ private:
     RaycastHit raycastHit;
 
     //  Audio audio;
-    EnemySystem enemySystem = EnemySystem(10);
+    EnemySystem enemySystem = EnemySystem(1);
 
     bool onGround = true;
     bool jumping = false;

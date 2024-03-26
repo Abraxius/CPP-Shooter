@@ -31,21 +31,38 @@ struct Enemy : public Model {
 
      // Methode zur Überprüfung, ob der Spieler im Sichtfeld des Feindes ist
     bool isPlayerInSight(glm::vec3 playerPosition) {
-        // Pseudocode: Überprüfen, ob der Spieler im Sichtfeld und innerhalb der Sichtweite des Feindes ist
         // Berechnen Sie den Vektor vom Feind zum Spieler
         glm::vec3 toPlayer = playerPosition - this->transform.position;
-        // Überprüfen Sie, ob der Spieler im Sichtfeld des Feindes ist (z.B. durch Dot-Produkt)
-        float dotProduct = glm::dot(glm::normalize(toPlayer), {0,0,1});
+
+        // Extrahiere die Y-Achsen-Rotation aus der Quaternion
+        glm::quat rotation = this->transform.rotation;
+        float angle = atan2(2.0f * (rotation.y * rotation.z + rotation.w * rotation.x), rotation.w * rotation.w - rotation.x * rotation.x - rotation.y * rotation.y + rotation.z * rotation.z); // Extrahiere die Drehung um die Y-Achse
+
+        // Berechne die Sichtachse des Zombies basierend auf seiner Rotation
+        glm::vec3 forwardDirection = glm::normalize(glm::vec3(glm::sin(angle), 0.0f, glm::cos(angle)));
+
+        // Überprüfen Sie, ob der Spieler im Sichtfeld des Zombies ist
+        float dotProduct = glm::dot(glm::normalize(toPlayer), forwardDirection);
         if (dotProduct > cos(fieldOfView / 2) && glm::length(toPlayer) < sightDistance) {
             playerVisible = true;
             return true;
         }
+
         playerVisible = true;
         return false;
     }
 
+    // Function to rotate the enemy towards a target position (player in this case)
+    void rotateTowards(const glm::vec3& targetPosition) {
+        glm::vec3 direction = glm::normalize(targetPosition - transform.position);
+        // Calculate the angle of rotation around the Y-axis
+        float angleY = atan2(direction.x, direction.z);
+        // Set the new Y rotation
+        this->transform.rotation.x = angleY;
+    }
+
 public:
-    float movementSpeed = 2.f;
+    float movementSpeed = 2.5f;
     float damage = 20.f;
     Sphere sphereCollider = Sphere(glm::vec3(1,1,1), .4f);
     bool died = false;
@@ -54,5 +71,5 @@ private:
     bool playerVisible;
     float health;
     float fieldOfView = 90.f;
-    float sightDistance = 10.f;
+    float sightDistance = 40.f;
 };
