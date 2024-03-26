@@ -63,14 +63,50 @@ struct App
                 window.handle_event(event);   // handle window resize and such events
                 Input::register_event(event); // handle keyboard/mouse events
             }
-            handle_inputs();
-            imgui_begin();
-            draw();
-            draw_ui();
-            imgui_end();
 
-            weapon.update();
-            updateGame();
+            if (startScreen)
+            {
+                if (firstStart)
+                {
+                    SDL_SetRelativeMouseMode(false);
+                    firstStart = false;
+                }
+
+                imgui_begin();
+                draw_start_ui();
+                handle_inputs_startScreen();
+                imgui_end();
+            }
+            else if (gameScreen)
+            {
+                if (firstStart)
+                {
+                    SDL_SetRelativeMouseMode(true);
+                    firstStart = false;
+                }
+
+                handle_inputs();
+                imgui_begin();
+                draw();
+                draw_ui();
+                imgui_end();
+
+                weapon.update();
+                updateGame();
+            }
+            else if (endScreen)
+            {
+                if (firstStart)
+                {
+                    SDL_SetRelativeMouseMode(false);
+                    firstStart = false;
+                }
+
+                imgui_begin();
+                draw_end_ui();
+                handle_inputs_endScreen();
+                imgui_end();
+            }
 
             // present drawn frame to the screen
             window.swap();
@@ -91,6 +127,68 @@ private:
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
+    void draw_start_ui()
+    {
+        ImVec2 start_window_size = {750, 500};
+        ImGui::SetNextWindowPos({(ImGui::GetIO().DisplaySize.x / 2) - (start_window_size.x / 2), (ImGui::GetIO().DisplaySize.y / 2) - (start_window_size.y / 2)});
+        ImGui::SetNextWindowSize(start_window_size);
+        ImGui::Begin("Mainmenu", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
+        ImGui::Text("");
+        TextCentered("Mainmenu");
+        ImGui::Text("");
+        ImGui::Text("");
+        TextCentered("Welcome to our Zombie Game which was programmed with OpenGL and SDL2.");
+        ImGui::Text("");
+        TextCentered("Kill as many zombies as you can and see how long you can stay alive!");
+        ImGui::Text("");
+        ImGui::Text("");
+        ImGui::Text("");
+        TextCentered("Remember that zombies can only die from headshots!!!");
+        ImGui::Text("");
+        ImGui::Text("");
+        ImGui::Text("");
+        TextCentered("To start the game press Q");
+        ImGui::End();
+    }
+
+    void draw_end_ui()
+    {
+        ImVec2 end_window_size = {750, 500};
+        ImGui::SetNextWindowPos({(ImGui::GetIO().DisplaySize.x / 2) - (end_window_size.x / 2), (ImGui::GetIO().DisplaySize.y / 2) - (end_window_size.y / 2)});
+        ImGui::SetNextWindowSize(end_window_size);
+        ImGui::Begin("Mainmenu", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
+        ImGui::Text("");
+        TextCentered("You lose!");
+        ImGui::Text("");
+        ImGui::Text("");
+        TextCentered("You have died!");
+        ImGui::Text("");
+        char buffer[50];
+        std::sprintf(buffer, "Your score is: %d", player.zombiesKilled);
+        std::string tmpText = buffer;
+        TextCentered(tmpText);
+        ImGui::Text("");
+        ImGui::Text("");
+        ImGui::Text("");
+        TextCentered("To exit the game press E");
+        ImGui::End();
+    }
+
+    void loseGame() {
+        gameScreen = false;
+        firstStart = true;
+        endScreen = true;
+    }
+
+    void TextCentered(std::string text)
+    {
+        auto windowWidth = ImGui::GetWindowSize().x;
+        auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
+
+        ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+        ImGui::Text(text.c_str());
+    }
+
     void draw_ui()
     {
         // Performance stats
@@ -225,6 +323,35 @@ private:
             std::swap(x0, x1);
 
         return true;
+    }
+
+    void handle_inputs_startScreen()
+    {
+        if (Keys::down('q'))
+        {
+            std::cout << "start game" << std::endl;
+            firstStart = true;
+            startScreen = false;
+            gameScreen = true;
+        }
+    }
+
+    void handle_inputs_endScreen()
+    {
+        if (Keys::down('e'))
+        {
+            std::cout << "restart game" << std::endl;
+
+            cleanup();
+            std::exit(0);      
+        }
+    }
+
+    void cleanup() {
+
+        weapon.projectilesList.clear();
+        player.map.walls.clear();
+        enemySystem.enemies.clear();
     }
 
     void handle_inputs()
@@ -382,12 +509,14 @@ private:
             float movementSpeed = timer.get_delta() * projectiles.movementSpeed;
             projectiles.move(0.0f, 0.0f, -movementSpeed);
 
-            if (projectiles.maxFlyDistanceAchieved()) {
-                //std::cout << "Kugel hat ihr Ziel erreicht" << std::endl;
+            if (projectiles.maxFlyDistanceAchieved())
+            {
+                // std::cout << "Kugel hat ihr Ziel erreicht" << std::endl;
                 weapon.deleteProjectile(projectiles);
             }
-            else {
-                //std::cout << "Kugel flieeeeeeeeg" << std::endl;
+            else
+            {
+                // std::cout << "Kugel flieeeeeeeeg" << std::endl;
             }
         }
 
@@ -398,7 +527,16 @@ private:
 
         // Add Player stamina
         player.increaseStamina(.08f);
+
+        if (!player.isAlive()) {
+            loseGame();
+        }
     }
+
+    bool startScreen = true;
+    bool gameScreen = false;
+    bool endScreen = false;
+    bool firstStart = true;
 
 private:
     Timer timer;
@@ -418,8 +556,9 @@ private:
 
     Model weaponModel = Model({1, 1, 1}, {0, 0, 0}, {0.2f, 0.2f, 0.2f}, "models/weapon/M4a1.obj");
 
-    std::array<Model, 1> models = {        
+    std::array<Model, 1> models = {
         Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/Environment/environment_low.obj"),
+        //Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/test/cube.obj"),
     };
 
     Weapon weapon;
