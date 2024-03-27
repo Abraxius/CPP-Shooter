@@ -94,7 +94,7 @@ struct App
                 draw();
                 draw_ui();
                 imgui_end();
-
+                
                 weapon.update();
                 updateGame();
             }
@@ -129,7 +129,9 @@ private:
     void imgui_end()
     {
         ImGui::Render();
+
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
     }
     void draw_start_ui()
     {
@@ -251,8 +253,11 @@ private:
                 for (auto &model : models)
                     model.draw();
 
-                for (auto &projectiles : weapon.projectilesList)
+
+                for (auto &projectiles : weapon.projectilesList) {
                     projectiles.draw();
+                }
+
 
                 weaponModel.draw();
 
@@ -299,10 +304,14 @@ private:
         for (auto &model : models)
             model.draw();
 
-        for (auto &projectiles : weapon.projectilesList)
+
+        for (auto &projectiles : weapon.projectilesList) {
             projectiles.draw();
+        }
+
 
         weaponModel.draw();
+
 
         for (auto &enemy : enemySystem.enemies)
             enemy.draw();
@@ -512,31 +521,36 @@ private:
             if (enemy.died)
             {
                 player.zombiesKilled++;
+                deleteEnemyIndex.push_back(enemy.ID);
             }
+        }
+
+        // Löscht die toten Zombies
+        for (size_t i = 0; i < deleteEnemyIndex.size(); ++i) {
+            enemySystem.deleteEnemies(i, enemySystem.enemies);
+            deleteEnemyIndex.erase(deleteEnemyIndex.begin() + i);   
         }
 
         // Update projectiles
         for (auto &projectiles : weapon.projectilesList)
         {
             // ToDo: Steuer die Kugel bewegung
-            float movementSpeed = timer.get_delta() * projectiles.movementSpeed;
-            projectiles.move(0.0f, 0.0f, -movementSpeed);
-
             if (projectiles.maxFlyDistanceAchieved())
             {
-                // std::cout << "Kugel hat ihr Ziel erreicht" << std::endl;
-                weapon.deleteProjectile(projectiles);
+                deleteProjectileIndex.push_back(projectiles.ID);
             }
             else
             {
-                // std::cout << "Kugel flieeeeeeeeg" << std::endl;
+                float movementSpeed = timer.get_delta() * projectiles.movementSpeed;
+                projectiles.move(0.0f, 0.0f, -movementSpeed);
             }
         }
 
-        // Remove dead enemies
-        // enemySystem.enemies.remove_if([](const Enemy& enemy) {
-        //     return enemy.died;
-        // });
+        // Löscht Kugeln die die Zielentfernung erreicht haben
+        for (size_t i = 0; i < deleteProjectileIndex.size(); ++i) {
+            weapon.deleteProjectile(i, weapon.projectilesList);
+            deleteProjectileIndex.erase(deleteProjectileIndex.begin() + i);   
+        }
 
         // Add Player stamina
         player.increaseStamina(.08f);
@@ -573,6 +587,7 @@ private:
 
     std::array<Model, 1> models = {        
         Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/Environment/environment_low3.obj"),
+        //Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/test/cube.obj"),
     };
 
     Weapon weapon;
@@ -583,4 +598,7 @@ private:
 
     bool onGround = true;
     bool jumping = false;
+
+    std::vector<int> deleteProjectileIndex;
+    std::vector<int> deleteEnemyIndex;
 };

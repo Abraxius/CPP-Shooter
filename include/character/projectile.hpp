@@ -44,6 +44,7 @@ public:
     glm::vec3 dir;
     float damage = 20.f;
     Sphere sphereCollider = Sphere(glm::vec3(1, 1, 1), .1f);
+    int ID;
 
 private:
     float maxFlyDistance = 90.f;

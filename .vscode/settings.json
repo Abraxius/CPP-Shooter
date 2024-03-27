@@ -87,6 +87,7 @@
         "xutility": "cpp",
         "ranges": "cpp",
         "coroutine": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "filesystem": "cpp"
     }
 }

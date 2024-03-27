@@ -17,10 +17,33 @@ struct EnemySystem {
 
     void spawnEnemys() {
         for (int i = 0; i < numberOfEnemies; i++) {
-            std::pair<int, int> cords = generateUniqueRandomCoordinate(-5, 5, -5, 5);
+            //std::pair<int, int> cords = generateUniqueRandomCoordinate(-20, 20, -20, 20);
+        std::pair<int, int> cords;
+        do {
+            cords = generateUniqueRandomCoordinate(-20, 20, -20, 20);
+        } while (cords.first < 5 && cords.first > -5 || cords.second < 5 && cords.second > -5);
             // Enemy newEnemy = Enemy({2 + (i + 2), 0, 0}, {0, 0, 0}, {.02, .02, .02}, "models/monkey/untitled.obj", 100.f);
             Enemy newEnemy = Enemy({cords.first, 0, cords.second}, {0, 0, 0}, {1, 1, 1}, "models/zombie/Enemy Zombie.obj", 100.f);
+            newEnemy.ID = spawnedEnemies;
             enemies.insert(enemies.end(), newEnemy);
+            spawnedEnemies++;
+        }
+    }
+
+    void deleteEnemies(int id, std::list<Enemy> &listToDeleteFrom)
+    {
+        for (auto it = listToDeleteFrom.begin(); it != listToDeleteFrom.end(); /* don't increment here */)
+        {
+            if (it->ID == id)
+            {
+                std::cout << "Enemie deleted" << std::endl;
+                it = listToDeleteFrom.erase(it);
+                spawnedEnemies--;
+            }
+            else
+            {
+                ++it;
+            }
         }
     }
 
@@ -44,4 +67,5 @@ private:
 public:
     std::list<Enemy> enemies;
     int numberOfEnemies;
+    int spawnedEnemies = 0;
 };

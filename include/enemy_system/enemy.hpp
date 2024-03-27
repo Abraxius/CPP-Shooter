@@ -66,6 +66,7 @@ public:
     float damage = 20.f;
     Sphere sphereCollider = Sphere(glm::vec3(1,1,1), .4f);
     bool died = false;
+    int ID;
 
 private:
     bool playerVisible;

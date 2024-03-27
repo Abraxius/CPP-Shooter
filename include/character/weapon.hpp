@@ -19,6 +19,7 @@ struct Weapon
     unsigned int reloadTime = 300;
 
     std::list<Projectile> projectilesList;
+    int projectNumbers = 0;
     // ToDo: für später
     // float precision;
     // float aimPrecision;
@@ -29,35 +30,49 @@ struct Weapon
 
     void shootProjectile(glm::vec3 playerPos, glm::vec3 playerRot)
     {
-            // The projectile will move from the start position in the direction of directionNormal.
-            // Add the projectile to the list.
+        // The projectile will move from the start position in the direction of directionNormal.
+        // Add the projectile to the list.
 
-            glm::vec3 spawnPosition = playerPos += glm::quat(playerRot) * glm::vec3(0,0,-1.5f);
-            Projectile newProjectile = Projectile(playerPos, playerRot, {0.2, 0.2, 0.2}, "models/test/cube.obj");
-            projectilesList.push_back(newProjectile);
+        glm::vec3 spawnPosition = playerPos += glm::quat(playerRot) * glm::vec3(0, 0, -1.5f);
+        Projectile newProjectile = Projectile(playerPos, playerRot, {0.2, 0.2, 0.2}, "models/test/cube.obj");
+        newProjectile.ID = projectNumbers;
+        projectilesList.push_back(newProjectile);
 
-            // Play sound.
-            /*if (mix_ChunkWeaponShoot != nullptr)
+        projectNumbers += 1;
+        // Play sound.
+        /*if (mix_ChunkWeaponShoot != nullptr)
+        {
+            int channelSelected = Mix_PlayChannel(-1, mix_ChunkWeaponShoot, 0);
+            // If it wasn't shot from the player then adjust it's volume based on it's position and angle relative to the player.
+            if (setShotFromPlayer == false && channelSelected > -1)
             {
-                int channelSelected = Mix_PlayChannel(-1, mix_ChunkWeaponShoot, 0);
-                // If it wasn't shot from the player then adjust it's volume based on it's position and angle relative to the player.
-                if (setShotFromPlayer == false && channelSelected > -1)
-                {
-                    float fDistanceSound = sqrt(distanceSound / 50.0f);
-                    if (fDistanceSound < 0.0f)
-                        fDistanceSound = 0.0f;
-                    if (fDistanceSound > 0.7f)
-                        fDistanceSound = 0.7f;
+                float fDistanceSound = sqrt(distanceSound / 50.0f);
+                if (fDistanceSound < 0.0f)
+                    fDistanceSound = 0.0f;
+                if (fDistanceSound > 0.7f)
+                    fDistanceSound = 0.7f;
 
-                    Mix_SetPosition(channelSelected, (int)angleSoundDeg, (int)(fDistanceSound * 255));
-                }
-            }*/
+                Mix_SetPosition(channelSelected, (int)angleSoundDeg, (int)(fDistanceSound * 255));
+            }
+        }*/
 
-            //cooldownTimer.resetToMax();
+        // cooldownTimer.resetToMax();
     }
-
-    void deleteProjectile(Projectile projectile) {
-        //ToDo: Zerstöre das Projektil
+    void deleteProjectile(int id, std::list<Projectile> &listToDeleteFrom)
+    {
+        for (auto it = listToDeleteFrom.begin(); it != listToDeleteFrom.end(); /* don't increment here */)
+        {
+            if (it->ID == id)
+            {
+                std::cout << "Projectile deleted" << std::endl;
+                it = listToDeleteFrom.erase(it);
+                projectNumbers--;
+            }
+            else
+            {
+                ++it;
+            }
+        }
     }
 
     bool fire() // ToDo: für später glm::vec3& direction,glm::vec3& startpoint,glm::vec3& camdirection
