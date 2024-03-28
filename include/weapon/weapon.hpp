@@ -1,6 +1,6 @@
 #pragma once
 
-#include "character/projectile.hpp"
+#include "weapon/projectile.hpp"
 
 struct Weapon
 {
@@ -20,47 +20,22 @@ struct Weapon
 
     std::list<Projectile> projectilesList;
     int projectNumbers = 0;
-    // ToDo: für später
-    // float precision;
-    // float aimPrecision;
-    // std::string name;
 
-    // ToDo: Für später
-    // void aim() {}
-
+    // Creates the projectile and adds it to the list
     void shootProjectile(glm::vec3 playerPos, glm::vec3 playerRot)
     {
-        // The projectile will move from the start position in the direction of directionNormal.
-        // Add the projectile to the list.
-
         glm::vec3 spawnPosition = playerPos += glm::quat(playerRot) * glm::vec3(0, 0, -1.5f);
         Projectile newProjectile = Projectile(playerPos, playerRot, {0.2, 0.2, 0.2}, "models/test/cube.obj");
         newProjectile.ID = projectNumbers;
         projectilesList.push_back(newProjectile);
 
         projectNumbers += 1;
-        // Play sound.
-        /*if (mix_ChunkWeaponShoot != nullptr)
-        {
-            int channelSelected = Mix_PlayChannel(-1, mix_ChunkWeaponShoot, 0);
-            // If it wasn't shot from the player then adjust it's volume based on it's position and angle relative to the player.
-            if (setShotFromPlayer == false && channelSelected > -1)
-            {
-                float fDistanceSound = sqrt(distanceSound / 50.0f);
-                if (fDistanceSound < 0.0f)
-                    fDistanceSound = 0.0f;
-                if (fDistanceSound > 0.7f)
-                    fDistanceSound = 0.7f;
-
-                Mix_SetPosition(channelSelected, (int)angleSoundDeg, (int)(fDistanceSound * 255));
-            }
-        }*/
-
-        // cooldownTimer.resetToMax();
     }
+
+    // Delte the projectile and remove it from the list
     void deleteProjectile(int id, std::list<Projectile> &listToDeleteFrom)
     {
-        for (auto it = listToDeleteFrom.begin(); it != listToDeleteFrom.end(); /* don't increment here */)
+        for (auto it = listToDeleteFrom.begin(); it != listToDeleteFrom.end();)
         {
             if (it->ID == id)
             {
@@ -75,7 +50,8 @@ struct Weapon
         }
     }
 
-    bool fire() // ToDo: für später glm::vec3& direction,glm::vec3& startpoint,glm::vec3& camdirection
+    // Called before shooting. This is where you check whether you can shoot at all, whether there is ammunition or whether the cooldown period is over.
+    bool fire() 
     {
         if (isReloading)
         {
@@ -87,7 +63,7 @@ struct Weapon
             {
                 if (bullets > 0)
                 {
-                    // ToDo: für später, minimale Abweichungen beim Schießen, Ungenauigkeiten
+                    // ToDo: For later, minimal deviations when shooting, inaccuracies
                     /*if (isAim)
                     {
                         direction.x = camdirection.x + ((float)(rand() % 2 - 1) / aimPrecision);
@@ -100,9 +76,14 @@ struct Weapon
                         direction.y = camdirection.y + ((float)(rand() % 2 - 1) / precision);
                         direction.z = camdirection.z + ((float)(rand() % 2 - 1) / precision);
                     }*/
+
                     isFired = true;
                     lastShot = 0;
-                    // Mix_PlayChannel(-1,firesound,0);
+
+                    // Play shot sound.
+                    // ToDo: If sdl3 mixer works, integrate audio here!
+                    // Mix_PlayChannel(-1, audio.samples[0], 0);
+
                     bullets--;
                     std::cout << "Munition: " << bullets << std::endl;
 
@@ -110,7 +91,10 @@ struct Weapon
                 }
                 else
                 {
-                    // Mix_PlayChannel(-1,emptysound,0);
+                    // Play empty sound.
+                    // ToDo: If sdl3 mixer works, integrate audio here!
+                    // Mix_PlayChannel(-1, audio.samples[0], 0);
+
                     reload();
                     return 0;
                 }
@@ -139,13 +123,18 @@ struct Weapon
                 bullets = availableBullets + bullets;
                 availableBullets = 0;
             }
-            std::cout << "Lädt nach!" << std::endl;
-            // Mix_PlayChannel(-1,reloadsound,0);
+            std::cout << "Loading!" << std::endl;
+
+            // Play reload sound.
+            // ToDo: If sdl3 mixer works, integrate audio here!
+            // Mix_PlayChannel(-1, audio.samples[0], 0);
+
             return true;
         }
         return false;
     }
 
+    // Manages the reload time
     void update()
     {
         if (!isReloading)
@@ -155,7 +144,7 @@ struct Weapon
             if (currentReloadTime >= reloadTime)
             {
                 currentReloadTime = 0;
-                std::cout << "Nachgeladen: " << bullets << std::endl;
+                std::cout << "Reloaded: " << bullets << std::endl;
                 isReloading = false;
             }
             else

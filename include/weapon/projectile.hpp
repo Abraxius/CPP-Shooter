@@ -10,14 +10,14 @@
 
 #include "game_objects/model.hpp"
 
-#include "character/raycastHit.hpp"
+#include "weapon/raycastHit.hpp"
 
+//Class that controls the creation and control of the weapon's ammunition objects
 struct Projectile : public Model
 {
     Projectile(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, std::string path)
         : Model(pos, rot, scale, path)
     {
-        sphereCollider.center = pos;
         startPoint = pos;
     }
 
@@ -41,9 +41,6 @@ struct Projectile : public Model
 
 public:
     float movementSpeed = 100.f;
-    glm::vec3 dir;
-    float damage = 20.f;
-    Sphere sphereCollider = Sphere(glm::vec3(1, 1, 1), .1f);
     int ID;
 
 private:

@@ -4,7 +4,7 @@
 #include <glbinding/glbinding.h>
 #include <SDL.h>
 
-// #include <SDL3_mixer/SDL_mixer.h>
+// #include <SDL3_mixer/SDL_mixer.h> // ToDo: Comment again when SDL3_Mixer is working
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
@@ -18,7 +18,7 @@ using namespace gl;
 #include "pipeline.hpp"
 #include "input.hpp"
 #include "timer.hpp"
-// #include "audio.hpp"
+// #include "audio.hpp" // ToDo: Comment again when SDL3_Mixer is working
 
 #include "game_objects/model.hpp"
 #include "game_objects/lights/light_point.hpp"
@@ -29,8 +29,8 @@ using namespace gl;
 #include "game_objects/player.hpp"
 #include <Jolt/Jolt.h>
 
-#include "character/weapon.hpp"
-#include "character/raycastHit.hpp"
+#include "weapon/weapon.hpp"
+#include "weapon/raycastHit.hpp"
 #include <list>
 
 struct App
@@ -42,7 +42,6 @@ struct App
         // attach texture to frame buffer (only draw to depth, no color output!)
         glNamedFramebufferReadBuffer(shadowPipeline.framebuffer, GL_NONE);
         glNamedFramebufferDrawBuffer(shadowPipeline.framebuffer, GL_NONE);
-
 
         skyboxPipeline.bind();
 
@@ -68,6 +67,7 @@ struct App
                 Input::register_event(event); // handle keyboard/mouse events
             }
 
+            // Show the respective screen and the UI
             if (startScreen)
             {
                 if (firstStart)
@@ -92,7 +92,7 @@ struct App
                 handle_inputs();
                 imgui_begin();
                 draw();
-                draw_ui();
+                //draw_ui();    //Attention!: If this is commented in, the UI is there, but sometimes it crashes when spawning/deleting objects
                 imgui_end();
                 
                 weapon.update();
@@ -126,6 +126,7 @@ private:
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
     }
+
     void imgui_end()
     {
         ImGui::Render();
@@ -133,6 +134,7 @@ private:
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     }
+
     void draw_start_ui()
     {
         ImVec2 start_window_size = {750, 500};
@@ -140,59 +142,21 @@ private:
         ImGui::SetNextWindowSize(start_window_size);
         ImGui::Begin("Mainmenu", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
         ImGui::Text("");
-        TextCentered("Mainmenu");
+        textCentered("Mainmenu");
         ImGui::Text("");
         ImGui::Text("");
-        TextCentered("Welcome to our Zombie Game which was programmed with OpenGL and SDL2.");
+        textCentered("Welcome to our Zombie Game which was programmed with OpenGL and SDL2.");
         ImGui::Text("");
-        TextCentered("Kill as many zombies as you can and see how long you can stay alive!");
-        ImGui::Text("");
-        ImGui::Text("");
-        ImGui::Text("");
-        TextCentered("Remember that zombies can only die from headshots!!!");
+        textCentered("Kill as many zombies as you can and see how long you can stay alive!");
         ImGui::Text("");
         ImGui::Text("");
         ImGui::Text("");
-        TextCentered("To start the game press Q");
+        textCentered("Remember that zombies can only die from headshots!!!");
+        ImGui::Text("");
+        ImGui::Text("");
+        ImGui::Text("");
+        textCentered("To start the game press Q");
         ImGui::End();
-    }
-
-    void draw_end_ui()
-    {
-        ImVec2 end_window_size = {750, 500};
-        ImGui::SetNextWindowPos({(ImGui::GetIO().DisplaySize.x / 2) - (end_window_size.x / 2), (ImGui::GetIO().DisplaySize.y / 2) - (end_window_size.y / 2)});
-        ImGui::SetNextWindowSize(end_window_size);
-        ImGui::Begin("Mainmenu", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
-        ImGui::Text("");
-        TextCentered("You lose!");
-        ImGui::Text("");
-        ImGui::Text("");
-        TextCentered("You have died!");
-        ImGui::Text("");
-        char buffer[50];
-        std::sprintf(buffer, "Your score is: %d", player.zombiesKilled);
-        std::string tmpText = buffer;
-        TextCentered(tmpText);
-        ImGui::Text("");
-        ImGui::Text("");
-        ImGui::Text("");
-        TextCentered("To exit the game press E");
-        ImGui::End();
-    }
-
-    void loseGame() {
-        gameScreen = false;
-        firstStart = true;
-        endScreen = true;
-    }
-
-    void TextCentered(std::string text)
-    {
-        auto windowWidth = ImGui::GetWindowSize().x;
-        auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
-
-        ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
-        ImGui::Text(text.c_str());
     }
 
     void draw_ui()
@@ -212,7 +176,7 @@ private:
         // Player stats
         ImVec2 player_window_size = {200, 150};
         ImGui::SetNextWindowPos({ImGui::GetIO().DisplaySize.x - (player_window_size.x + 20), ImGui::GetIO().DisplaySize.y - (player_window_size.y + 20)});
-        ImGui::SetNextWindowSize({200, 150});
+        ImGui::SetNextWindowSize(player_window_size);
         ImGui::Begin("Player stats", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
         ImGui::Text("Player");
         ImGui::Text("%.1f HP", player.health);
@@ -224,12 +188,36 @@ private:
         // Gameplay info
         ImVec2 gameplay_window_size = {250, 100};
         ImGui::SetNextWindowPos({ImGui::GetIO().DisplaySize.x - (gameplay_window_size.x + 20), 20});
-        ImGui::SetNextWindowSize({250, 100});
+        ImGui::SetNextWindowSize(gameplay_window_size);
         ImGui::Begin("Gameplay info", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
         ImGui::Text("%d Zombies left", enemySystem.enemies.size());
         ImGui::Text("%d Zombies killed", player.zombiesKilled);
         ImGui::End();
     }
+
+    void draw_end_ui()
+    {
+        ImVec2 end_window_size = {750, 500};
+        ImGui::SetNextWindowPos({(ImGui::GetIO().DisplaySize.x / 2) - (end_window_size.x / 2), (ImGui::GetIO().DisplaySize.y / 2) - (end_window_size.y / 2)});
+        ImGui::SetNextWindowSize(end_window_size);
+        ImGui::Begin("Mainmenu", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
+        ImGui::Text("");
+        textCentered("You lose!");
+        ImGui::Text("");
+        ImGui::Text("");
+        textCentered("You have died!");
+        ImGui::Text("");
+        char buffer[50];
+        std::sprintf(buffer, "Your score is: %d", player.zombiesKilled);
+        std::string tmpText = buffer;
+        textCentered(tmpText);
+        ImGui::Text("");
+        ImGui::Text("");
+        ImGui::Text("");
+        textCentered("To exit the game press E");
+        ImGui::End();
+    }
+
     void draw()
     {
         // first pass: render shadow map
@@ -249,15 +237,14 @@ private:
                 glClear(GL_DEPTH_BUFFER_BIT);
                 // bind resources to pipeline
                 lights[iLight].bind_write(face);
+
                 // draw models
                 for (auto &model : models)
                     model.draw();
 
-
                 for (auto &projectiles : weapon.projectilesList) {
                     projectiles.draw();
                 }
-
 
                 weaponModel.draw();
 
@@ -283,7 +270,6 @@ private:
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //
         glBindFramebuffer(GL_FRAMEBUFFER, skyboxPipeline.framebuffer);
         // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         skyboxPipeline.bind();
@@ -298,20 +284,19 @@ private:
         {
             lights[iLight].bind_read(iLight, iLight + 1);
         }
+
         // draw models
         for (auto &light : lights)
             light.draw();
+
         for (auto &model : models)
             model.draw();
-
 
         for (auto &projectiles : weapon.projectilesList) {
             projectiles.draw();
         }
 
-
         weaponModel.draw();
-
 
         for (auto &enemy : enemySystem.enemies)
             enemy.draw();
@@ -327,7 +312,7 @@ private:
         return std::make_pair(x, y);
     }
 
-    // Formel um das Vorzeichen Problem bei der Analythischen zu beheben
+    // Formula to solve the sign problem with the analytic
     bool solveQuadratic(const float &a, const float &b, const float &c, float &x0, float &x1)
     {
         float discr = b * b - 4 * a * c;
@@ -390,9 +375,11 @@ private:
 
         // player movement
         float movementSpeed = timer.get_delta() * player.movementSpeed;
+        
+        // sprint button
         if (Keys::down(SDL_KeyCode::SDLK_LSHIFT) && player.stamina > 0.5f)
         {
-            movementSpeed *= player.sprintSpeed; // sprint button
+            movementSpeed *= player.sprintSpeed; 
             player.decreaseStamina(.7f);
         }
 
@@ -417,12 +404,8 @@ private:
                 weapon.shootProjectile(player.position, player.rotation);
 
                 for (auto &enemie : enemySystem.enemies)
-                {
                     if (raycastHit.isCollision(ray, enemie.sphereCollider))
-                    {
                         enemie.hit(50.0f);
-                    }
-                }
             }
             else
             {
@@ -430,49 +413,32 @@ private:
             }
         }
 
-        if (Keys::down('l'))
-        {
-            // enemySystem.spawnEnemys();
-        }
-        // if (Keys::pressed('r')) Mix_PlayChannel(-1, audio.samples[0], 0);
-
-        // Schwerkraft und Springen
-        float jumpHeight = 5.0f; // Maximale Höhe des Sprungs
-        float jumpSpeed = 0.1f;  // Geschwindigkeit des Sprungs
-        float gravity = 0.05f;   // Schwerkraft
+        // Gravity and jumping
+        float jumpHeight = 5.0f; // Maximum height of the jump
+        float jumpSpeed = 0.1f;  // Speed of the jump
+        float gravity = 0.05f;   // Gravity
 
         if (Keys::down(32) && onGround)
-        {
             jumping = true;
-        }
 
         if (jumping)
         {
             player.move(0.0f, jumpSpeed, 0.0f);
             if (jumpHeight < player.position.y)
-            {
                 jumping = false;
-            }
         }
 
         if (player.position.y > 2)
-        {
             onGround = false;
-        }
         else
-        {
             onGround = true;
-        }
 
         if (!onGround)
-        {
             player.move(0.0f, -gravity, 0.0f);
-        }
         else
-        {
             player.position.y = 2;
-        }
 
+        // Player movement calculation
         player.rotation.x -= player.rotationSpeed * Mouse::delta().second;
         player.rotation.y -= player.rotationSpeed * Mouse::delta().first;
 
@@ -480,15 +446,23 @@ private:
         camera.position = player.position;
         camera.rotation = player.rotation;
 
-        // Berechnen der neuen Position der Waffe basierend auf der Kamerarotation und der Offset-Position
+        // Calculate the new position of the weapon based on the camera rotation and the offset position
         glm::vec3 weaponPosition = camera.position + (glm::quat(camera.rotation) * glm::vec3(0.25f, -0.5f, -1.0f));
 
         float pi = 3.14159265358979323846f;
 
         weaponModel.transform.position = weaponPosition;
-        weaponModel.transform.rotation = glm::vec3(camera.rotation.y + pi, -camera.rotation.x, camera.rotation.z); // ToDo: Ich hab keine Ahnung warum diese Mathe funktioniert??? WTF???? Später nochmal anschauen!!!
+        weaponModel.transform.rotation = glm::vec3(camera.rotation.y + pi, -camera.rotation.x, camera.rotation.z); 
+
+        // Test buttons
+        /*if (Keys::down('l'))
+        {
+            // enemySystem.spawnEnemys();
+        }*/
+        // if (Keys::pressed('r')) Mix_PlayChannel(-1, audio.samples[0], 0);
     }
 
+    // Updates the movement of enemies and projectiles, also checks whether an object needs to be deleted
     void updateGame()
     {
         for (auto &enemy : enemySystem.enemies)
@@ -496,7 +470,6 @@ private:
             // Check if player is seen by enemy
             if (enemy.isPlayerInSight(player.position))
             {
-                // std::cout << "Spieler wurde vom Zombie gesehen!" << std::endl;
                 //  Move Enemy towards Player
                 glm::vec3 direction = glm::normalize(player.position - enemy.transform.position);
                 enemy.rotateTowards(player.position);
@@ -509,11 +482,9 @@ private:
             }
             // Check if player is hit by enemy
             float distanceToEnemy = glm::distance(player.position, enemy.transform.position);
-            // std::cout << distanceToEnemy << std::endl;
             float collisionRadius = 2.5f;
             if (distanceToEnemy <= collisionRadius)
             {
-                // std::cout << "sadasd" << std::endl;
                 player.takeDamage(enemy.damage);
             }
 
@@ -525,7 +496,7 @@ private:
             }
         }
 
-        // Löscht die toten Zombies
+        // Delete the dead zombies
         for (size_t i = 0; i < deleteEnemyIndex.size(); ++i) {
             enemySystem.deleteEnemies(i, enemySystem.enemies);
             deleteEnemyIndex.erase(deleteEnemyIndex.begin() + i);   
@@ -534,7 +505,6 @@ private:
         // Update projectiles
         for (auto &projectiles : weapon.projectilesList)
         {
-            // ToDo: Steuer die Kugel bewegung
             if (projectiles.maxFlyDistanceAchieved())
             {
                 deleteProjectileIndex.push_back(projectiles.ID);
@@ -546,7 +516,7 @@ private:
             }
         }
 
-        // Löscht Kugeln die die Zielentfernung erreicht haben
+        // Deletes balls that have reached the target distance
         for (size_t i = 0; i < deleteProjectileIndex.size(); ++i) {
             weapon.deleteProjectile(i, weapon.projectilesList);
             deleteProjectileIndex.erase(deleteProjectileIndex.begin() + i);   
@@ -555,9 +525,14 @@ private:
         // Add Player stamina
         player.increaseStamina(.08f);
 
-        if (!player.isAlive()) {
+        if (!player.isAlive()) 
             loseGame();
-        }
+    }
+
+    void loseGame() {
+        gameScreen = false;
+        firstStart = true;
+        endScreen = true;
     }
 
     bool startScreen = true;
@@ -566,6 +541,16 @@ private:
     bool firstStart = true;
 
 private:
+
+    void textCentered(std::string text)
+    {
+        auto windowWidth = ImGui::GetWindowSize().x;
+        auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
+
+        ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+        ImGui::Text(text.c_str());
+    }
+
     Timer timer;
     Window window = Window(1280, 720, 4);
     bool bRunning = true;
@@ -586,14 +571,14 @@ private:
     Model weaponModel = Model({1, 1, 1}, {0, 0, 0}, {0.2f, 0.2f, 0.2f}, "models/weapon/M4a1.obj");
 
     std::array<Model, 1> models = {        
-        Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/Environment/environment_low3.obj"),
-        //Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/test/cube.obj"),
+        //Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/Environment/environment_low3.obj"),
+        Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/test/cube.obj"), //"TestMap" for faster start of the game
     };
 
     Weapon weapon;
     RaycastHit raycastHit;
 
-    //  Audio audio;
+    //  Audio audio; //ToDo: Comment again when SDL3_Mixer is working
     EnemySystem enemySystem = EnemySystem(1);
 
     bool onGround = true;

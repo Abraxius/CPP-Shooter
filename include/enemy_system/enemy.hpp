@@ -10,8 +10,9 @@
 
 #include "game_objects/model.hpp"
 
-#include "character/raycastHit.hpp"
+#include "weapon/raycastHit.hpp"
 
+// Enemy class
 struct Enemy : public Model {
     Enemy(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, std::string path, float health)
         : Model(pos, rot, scale, path), health(health) {
@@ -19,29 +20,32 @@ struct Enemy : public Model {
             sphereCollider.center.y = 2.5f;
         }
 
+    // The unit takes damage
     void hit(int damage) {
         std::cout << "Enemy hit! (" << damage << "damage)" << std::endl;
         health = health - damage;
         if(health <= 0) die();
     }
+
+    // The unit die
     void die() {
         std::cout << "Enemy died!" << std::endl;
         died = true;
     }
 
-     // Methode zur Überprüfung, ob der Spieler im Sichtfeld des Feindes ist
+     // Method for checking whether the player is in the enemy's field of vision
     bool isPlayerInSight(glm::vec3 playerPosition) {
-        // Berechnen Sie den Vektor vom Feind zum Spieler
+        // Calculate the vector from the enemy to the player
         glm::vec3 toPlayer = playerPosition - this->transform.position;
 
-        // Extrahiere die Y-Achsen-Rotation aus der Quaternion
+        // Extract the Y-axis rotation from the quaternion
         glm::quat rotation = this->transform.rotation;
         float angle = atan2(2.0f * (rotation.y * rotation.z + rotation.w * rotation.x), rotation.w * rotation.w - rotation.x * rotation.x - rotation.y * rotation.y + rotation.z * rotation.z); // Extrahiere die Drehung um die Y-Achse
 
-        // Berechne die Sichtachse des Zombies basierend auf seiner Rotation
+        // Calculate the zombie's line of sight based on its rotation
         glm::vec3 forwardDirection = glm::normalize(glm::vec3(glm::sin(angle), 0.0f, glm::cos(angle)));
 
-        // Überprüfen Sie, ob der Spieler im Sichtfeld des Zombies ist
+        // Check whether the player is in the zombie's field of vision
         float dotProduct = glm::dot(glm::normalize(toPlayer), forwardDirection);
         if (dotProduct > cos(fieldOfView / 2) && glm::length(toPlayer) < sightDistance) {
             playerVisible = true;
