@@ -571,8 +571,8 @@ private:
     Model weaponModel = Model({1, 1, 1}, {0, 0, 0}, {0.2f, 0.2f, 0.2f}, "models/weapon/M4a1.obj");
 
     std::array<Model, 1> models = {        
-        //Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/Environment/environment_low3.obj"),
-        Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/test/cube.obj"), //"TestMap" for faster start of the game
+        Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/Environment/environment_low3.obj"),
+        //Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/test/cube.obj"), //"TestMap" for faster start of the game
     };
 
     Weapon weapon;
