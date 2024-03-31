@@ -43,10 +43,10 @@ struct App
         glNamedFramebufferReadBuffer(shadowPipeline.framebuffer, GL_NONE);
         glNamedFramebufferDrawBuffer(shadowPipeline.framebuffer, GL_NONE);
 
-        skyboxPipeline.bind();
+        // skyboxPipeline.bind();
 
         // Spawn Zombies
-        enemySystem.spawnEnemys();
+        enemySystem.start();
         std::cout << "All models loaded!" << std::endl;
     }
 
@@ -270,12 +270,12 @@ private:
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, skyboxPipeline.framebuffer);
-        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        skyboxPipeline.bind();
-        // set framebuffer texture and clear it
-        skybox.bind();
-        // glUniform1i(glGetUniformLocation(2, "skybox"), 0);
+        // glBindFramebuffer(GL_FRAMEBUFFER, skyboxPipeline.framebuffer);
+        // // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // skyboxPipeline.bind();
+        // // set framebuffer texture and clear it
+        // skybox.bind();
+        // // glUniform1i(glGetUniformLocation(2, "skybox"), 0);
 
         colorPipeline.bind();
         // bind resources to pipeline
@@ -558,8 +558,10 @@ private:
     // render resources
     Pipeline colorPipeline = Pipeline("shaders/default.vs", "shaders/default.fs");
     Pipeline shadowPipeline = Pipeline("shaders/shadowmapping.vs", "shaders/shadowmapping.fs");
-    Pipeline skyboxPipeline = Pipeline("shaders/skybox.vs", "shaders/skybox.fs");
-    Skybox skybox = Skybox();
+
+    // Skybox
+    // Pipeline skyboxPipeline = Pipeline("shaders/skybox.vs", "shaders/skybox.fs");
+    // Skybox skybox = Skybox();
 
     Player player = Player({1, 2, 1}, {0, 0, 0}, 100.f, 100.f, 2.f, 3.f, 0.001f);
     Camera camera = Camera({1, 2, 1}, {0, 0, 0}, window.width, window.height);
@@ -579,7 +581,10 @@ private:
     RaycastHit raycastHit;
 
     //  Audio audio; //ToDo: Comment again when SDL3_Mixer is working
-    EnemySystem enemySystem = EnemySystem(1);
+
+    // Waves and EnemySystem
+    Wave waves[5] = { {1}, {3}, {5}, {8}, {10}, {15}, {20}, {30} };
+    EnemySystem enemySystem = EnemySystem(waves, sizeof(waves) / sizeof(waves[0]));
 
     bool onGround = true;
     bool jumping = false;
