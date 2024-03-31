@@ -583,7 +583,7 @@ private:
     //  Audio audio; //ToDo: Comment again when SDL3_Mixer is working
 
     // Waves and EnemySystem
-    Wave waves[5] = { {1}, {3}, {5}, {8}, {10}, {15}, {20}, {30} };
+    Wave waves[8] = { {1}, {3}, {5}, {8}, {10}, {15}, {20}, {30} };
     EnemySystem enemySystem = EnemySystem(waves, sizeof(waves) / sizeof(waves[0]));
 
     bool onGround = true;
