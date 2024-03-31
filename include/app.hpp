@@ -498,7 +498,7 @@ private:
 
         // Delete the dead zombies
         for (size_t i = 0; i < deleteEnemyIndex.size(); ++i) {
-            enemySystem.deleteEnemies(i, enemySystem.enemies);
+            enemySystem.deleteEnemies(deleteEnemyIndex[i], enemySystem.enemies);
             deleteEnemyIndex.erase(deleteEnemyIndex.begin() + i);   
         }
 
@@ -518,7 +518,7 @@ private:
 
         // Deletes balls that have reached the target distance
         for (size_t i = 0; i < deleteProjectileIndex.size(); ++i) {
-            weapon.deleteProjectile(i, weapon.projectilesList);
+            weapon.deleteProjectile(deleteProjectileIndex[i], weapon.projectilesList);
             deleteProjectileIndex.erase(deleteProjectileIndex.begin() + i);   
         }
 
