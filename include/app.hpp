@@ -405,7 +405,7 @@ private:
 
                 for (auto &enemie : enemySystem.enemies)
                     if (raycastHit.isCollision(ray, enemie.sphereCollider))
-                        enemie.hit(50.0f);
+                        enemie.hit(100.0f);
             }
             else
             {
@@ -498,7 +498,7 @@ private:
 
         // Delete the dead zombies
         for (size_t i = 0; i < deleteEnemyIndex.size(); ++i) {
-            enemySystem.deleteEnemies(i, enemySystem.enemies);
+            enemySystem.deleteEnemies(deleteEnemyIndex[i], enemySystem.enemies);
             deleteEnemyIndex.erase(deleteEnemyIndex.begin() + i);   
         }
 
@@ -518,7 +518,7 @@ private:
 
         // Deletes balls that have reached the target distance
         for (size_t i = 0; i < deleteProjectileIndex.size(); ++i) {
-            weapon.deleteProjectile(i, weapon.projectilesList);
+            weapon.deleteProjectile(deleteProjectileIndex[i], weapon.projectilesList);
             deleteProjectileIndex.erase(deleteProjectileIndex.begin() + i);   
         }
 
@@ -571,15 +571,15 @@ private:
     Model weaponModel = Model({1, 1, 1}, {0, 0, 0}, {0.2f, 0.2f, 0.2f}, "models/weapon/M4a1.obj");
 
     std::array<Model, 1> models = {        
-        Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/Environment/environment_low3.obj"),
-        //Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/test/cube.obj"), //"TestMap" for faster start of the game
+        //Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/Environment/environment_low3.obj"),
+        Model({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, "models/test/cube.obj"), //"TestMap" for faster start of the game
     };
 
     Weapon weapon;
     RaycastHit raycastHit;
 
     //  Audio audio; //ToDo: Comment again when SDL3_Mixer is working
-    EnemySystem enemySystem = EnemySystem(1);
+    EnemySystem enemySystem = EnemySystem(7);
 
     bool onGround = true;
     bool jumping = false;
