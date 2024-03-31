@@ -14,7 +14,7 @@
 
 // Enemy class
 struct Enemy : public Model {
-    Enemy(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, std::string path)
+    Enemy(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, std::string path, float health)
         : Model(pos, rot, scale, path), health(health) {
             sphereCollider.center = pos;
             sphereCollider.center.y = 2.5f;
@@ -74,7 +74,7 @@ public:
 
 private:
     bool playerVisible;
-    float health = 100.f;
+    float health;
     float fieldOfView = 90.f;
     float sightDistance = 40.f;
 };
